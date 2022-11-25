@@ -1,0 +1,102 @@
+.recycle-bin-container {
+	position: fixed;
+	top: 46px;
+	right: 0;
+	width: 480px;
+	height: 420px;
+	padding: 10px 20px;
+	z-index: 99;
+	background-color: #1C2026;
+	border-left: 1px solid #000000;
+	box-shadow: 0 1px 2px #000000;
+	transform: translateX(480px);
+	transition: all 0.2s ease;
+	z-index: 999;
+
+	.recycle-header {
+		height: 50px;
+		border-bottom: 1px solid #666666;
+
+		.title {
+			color: #ffffff;
+		}
+
+		.close-icon {
+			font-size: 20px;
+			color: #1890ff;
+			cursor: pointer;
+		}
+	}
+
+	.recycle-footer {
+		position: absolute;
+		bottom: 0;
+		left: 20px;
+		right: 20px;
+		height: 50px;
+
+		.footer-hr {
+			position: absolute;
+			width: 100%;
+			top: 0;
+			margin: 0;
+			height: 1px;
+			background-color: #666666;
+			border: none;
+			box-shadow: 0 -3px 3px #000000;
+		}
+	}
+
+	.recycle-table {
+		margin-top: 10px;
+
+		.ant-table-thead>tr>th,
+		.row-class-name {
+			background-color: #1C2026;
+			color: #cccccc;
+		}
+
+		.ant-table-thead>tr>th,
+		.ant-table-tbody>tr>td {
+			border-bottom: 1px solid #666666;
+			font-size: 13px;
+		}
+
+		.ant-table-row-selected>td,
+		.ant-table-tbody>tr:hover>td {
+			background-color: #212e3e !important;
+		}
+
+		.ant-table-cell-scrollbar {
+			display: none;
+		}
+
+		::-webkit-scrollbar {
+			display: none;
+		}
+	}
+
+	.operate-icon {
+		font-size: 16px;
+
+		span {
+			display: inline-block;
+			margin-right: 5px;
+			cursor: pointer;
+		}
+
+		span:hover {
+			color: #1890ff;
+		}
+	}
+}
+.del-mask {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 997;
+	background-color: #000000;
+	opacity: 0.2;
+}

@@ -1,0 +1,38 @@
+// 隐藏滚动条
+::-webkit-scrollbar {
+    display: none;
+}
+
+.preview-container {
+    .kanban-preview-content {
+        /* firefox */
+        scrollbar-width: none;
+        /* IE 10+ */
+        -ms-overflow-style: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        box-shadow: 0 0 15px 3px #111111;
+        transform-origin: 0 0;
+        transition: .2s all ease-in-out;
+        background-size: cover, contain;
+        background-position: center, right bottom;
+        background-repeat: no-repeat, no-repeat;
+        z-index: 9;
+        user-select: none;
+    
+        .chart-item {
+            position: absolute;
+        }
+    }
+    .kanban-bg {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        opacity: 0.9;
+        background-color: #ffffff;
+    }
+}

@@ -1,0 +1,50 @@
+.eagle-eye-container {
+	position: absolute;
+	bottom: 46px;
+	right: 10px;
+	width: 0;
+	height: 0;
+	background-color: rgba(0, 0, 0, .5);
+	border: 1px solid #2681ff;
+	transition: all 0.25s ease;
+	overflow: hidden;
+
+	.eagle-eye-content {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		top: 0;
+
+		.eagle-chart-list {
+			position: relative;
+			top: 5px;
+			left: 5px;
+
+			.simulate,
+			.backdrop-canvas {
+				position: absolute;
+				border: 1px solid #206399;
+			}
+			.backdrop-canvas {
+				background-color: rgba(0, 0, 0, .4);
+			}
+		}
+
+		.backdrop-area {
+			// display: none;
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 96px;
+			height: 54px;
+			background-color: rgba(0, 255, 255, .8);
+		}
+		.active-backdrop-area {
+			display: block;
+		}
+		.active-backdrop-canvas {
+			background-color: rgba(0, 134, 134, .6);
+		}
+	}
+}

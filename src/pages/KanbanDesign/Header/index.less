@@ -1,0 +1,62 @@
+.design-header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 46px;
+	background-color: #1C2026;
+	padding: 10px;
+	border-bottom: 1px solid #000000;
+	box-sizing: border-box;
+	z-index: 99;
+
+	.kanban-name {
+		width: 34%;
+		text-align: center;
+		cursor: pointer;
+
+		.project-icon {
+			padding: 0 4px;
+			color: #ffffff;
+
+			&:hover {
+				color: #1890ff;
+			}
+		}
+	}
+	.header-left,
+	.header-right {
+		width: 33%;
+		color: #ffffff;
+		font-size: 16px;
+
+		.icon-span {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			padding: 4px 12px;
+			background-color: #2F353F;
+		}
+		.icon-span:hover {
+			color: #1890ff;
+		}
+	}
+	.header-left {
+		.icon-span {
+			margin-right: 5px;
+		}
+	}
+	.header-right {
+		.icon-span {
+			margin-left: 8px;
+		}
+		.use-help {
+			font-size: 13px;
+			margin-right: 10px;
+			span {
+				margin-right: 4px;
+			}
+		}
+	}
+}

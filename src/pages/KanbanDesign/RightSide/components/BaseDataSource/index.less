@@ -1,0 +1,87 @@
+.base-data-source-container {
+    padding: 10px 0;
+    color: #bcc9d4;
+
+    .source-config-header {
+        padding: 10px;
+        border-bottom: 1px solid #666666;
+        color: #ffffff;
+    }
+
+    .source-fields-table {
+        margin-top: 10px;
+        border-bottom: 1px solid #666666;
+    
+        .ant-table-thead > tr > th,
+        .row-class-name {
+            background-color: #1C2026;
+            color: #bcc9d4;
+        }
+        .ant-table-tbody > tr > td {
+            border-bottom: none;
+            font-size: 13px;
+        }
+        .ant-table-thead > tr > th  {
+            border-bottom: 1px solid #666666;
+        }
+        .ant-table-row-selected > td,
+        .ant-table-tbody > tr:hover > td {
+            background-color: #212e3e !important;
+        }
+        .ant-table-cell-scrollbar {
+            display: none;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        .config-map-input {
+            background-color: #212e3e;
+            color: #ffffff;
+        }
+    }
+
+    .data-response-result {
+        .time-line-content {
+            padding: 10px 10px 0 10px;
+
+            .soure-des {
+                display: inline-block;
+                padding: 6px;
+                background-color: #39414d;
+                border-radius: 1px;
+                line-height: 12px;
+                font-size: 12px;
+                box-shadow: 0 0 5px -3px #000;
+            }
+        }
+        .auto-update {
+            padding: 10px;
+
+            .input-number {
+                width: 60px;
+                margin-right: 10px;
+            }
+        }
+    }
+    
+    .status-span {
+        display: block;
+        left: 0;
+        top: 6px;
+        height: 6px;
+        width: 6px;
+        margin-right: 8px;
+        background-color: #1980ff;
+        -webkit-box-shadow: 0 0 4px -2px #000;
+        box-shadow: 0 0 4px -2px #000;
+    }
+    .ant-timeline-item-last > .ant-timeline-item-content {
+        min-height: 0;
+    }
+    .ant-timeline-item-last {
+        padding-bottom: 0;
+    }
+    .refresh-icon:hover {
+        cursor: pointer;
+    }
+}

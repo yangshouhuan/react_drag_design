@@ -1,0 +1,43 @@
+.design-container {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 1;
+	overflow: hidden;
+
+	.design-content {
+		position: absolute;
+		left: 210px;
+		top: 46px;
+		// bottom: 36px;
+		// right: 336px;
+		right: 0;
+		bottom: 0;
+		transition: 0.2s all ease-in-out;
+		z-index: 1;
+	
+		.kanban-layer-content {
+			position: absolute;
+			left: 40px;
+			top: 40px;
+			background-color: rgb(14, 42, 66);
+			background-size: cover, contain;
+			background-position: center, right bottom;
+			background-repeat: no-repeat, no-repeat;
+			transition: 0.2s all ease-in-out;
+			transform-origin: 0 0;
+			box-shadow: 0 0 15px 3px #111111;
+		}
+	}
+
+	.design-bg {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		z-index: -1;
+	}
+}
