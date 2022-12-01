@@ -6,18 +6,16 @@ import { LockOutlined, UserOutlined, MobileOutlined, DingdingOutlined } from '@a
 import { useNavigate } from 'react-router-dom'
 
 const Register = () => {
-
 	const navigate = useNavigate()
 
 	const onRegister = (values: any) => {
 		if (values.Pwd !== values.Pwd2) {
-			message.error('两次密码不一致')
-			return
+			return message.error('两次密码不一致')
 		}
 		register(values)
 		.then((res: any) => {
 			if (res.status) {
-				navigate('/', {replace: true})
+				navigate('/', { replace: true })
 			}
 		})
 	}

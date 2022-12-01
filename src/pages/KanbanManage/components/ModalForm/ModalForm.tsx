@@ -5,12 +5,7 @@ import {
   Spin,
   FormInstance
 } from 'antd'
-
-interface FormItemType {
-  name: string
-  label: string
-  component: string
-}
+import { FormItemType } from '.'
 
 // 添加、编辑项目表单
 const ModalForm = ({

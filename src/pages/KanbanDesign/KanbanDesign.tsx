@@ -40,7 +40,6 @@ const KanbanDesign = ({
 	doActionVisible: Function
 	screen: any
 }) => {
-	const { width, height, adaptive_scale } = canvasStyle
 
 	// 行为组件坐标
 	const actionXY = useMemo(() => {
@@ -70,16 +69,7 @@ const KanbanDesign = ({
 			<AllLayers />
 			<Design canvasStyle={canvasStyle} />
 			<RightSide />
-			<Footer
-				doCanvasStyle={doCanvasStyle}
-				canvasStyle={canvasStyle}
-				onSetScale={(scale: number) => doCanvasStyle({ ...canvasStyle, scale })}
-				chartData={chartData}
-				onCalculateScale={() => {
-					const scale = calculateScale(screen.sw, screen.sh, width, height)
-					doCanvasStyle({ ...canvasStyle, scale, adaptive_scale: scale, x: 0, y: 0 })
-				}}
-			/>
+			<Footer />
 			{/* 行为组件 */}
 			<ActionComponent
 				left={actionXY.x}

@@ -28,7 +28,7 @@ export function RequestPost(url, data) {
         status: 0,
         message: '暂无权限'
       })
-    }, 300)
+    }, 3000)
   })
 }
 

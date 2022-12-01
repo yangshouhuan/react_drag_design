@@ -1,1 +1,1 @@
-export * from './useApi'
+export const AS = 'AS'

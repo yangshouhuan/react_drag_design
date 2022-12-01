@@ -1,9 +1,6 @@
 import { createAction } from 'redux-actions'
 import * as T from '../constants'
 import { Modal } from 'antd'
-import { login } from 'api/user'
-import { resolve } from 'dns'
-import { rejects } from 'assert'
 
 const { confirm } = Modal
 
@@ -33,10 +30,11 @@ export const doLogout = () => {
 // 登录
 export const doLogin = (value: any) => {
     return (dispatch: Function, getState: Function) => {
-
-        // 模仿登录请求
-        if (!getState().user.isLogin) {
-            new Promise((resolve, rejects) => {
+        if (getState().user.isLogin) return
+        
+        return new Promise((resolve, reject) => {
+            // 模仿登录请求
+            new Promise((resolve, reject) => {
                 setTimeout(() => {
                     resolve({
                         status: 1,
@@ -54,8 +52,11 @@ export const doLogin = (value: any) => {
                         user_id: res.data.id
                     }))
                 }
+                resolve(res)
+            }).catch(error => {
+                reject(error)
             })
-        }
+        })
     }
 }
 

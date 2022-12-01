@@ -14,6 +14,7 @@ import {
 import EagleEye from './components/EagleEye'
 import { ChartType } from 'types/chart'
 import classNames from 'classnames'
+import { calculateScale } from 'layouts/KanbanDesignLayout'
 
 const selectRatio = [
 	{ value: 0, text: '自适应' },
@@ -25,32 +26,36 @@ const selectRatio = [
 
 const Footer = ({
 	footerStyle,
-	onCalculateScale,
-	onSetScale,
 	chartData,
 	activeId,
 	canvasStyle,
-	doCanvasStyle
+	doCanvasStyle,
+	screen
 }: {
 	footerStyle: Object
-	onCalculateScale: Function
-	onSetScale: Function
 	chartData: ChartType[]
 	activeId: number
 	canvasStyle: any
-	doCanvasStyle: Function
+	doCanvasStyle: Function,
+	screen: any
 }) => {
 	const [eyeVisible, setEyeVisible] = useState(true)
+
+	// 计算缩放
+	const onCalculateScale = () => {
+		const scale = calculateScale(screen.sw, screen.sh, canvasStyle.width, canvasStyle.height)
+		doCanvasStyle({ ...canvasStyle, scale, adaptive_scale: scale, x: 0, y: 0 })
+	}
 
 	// 修改缩放
 	const onClickEidtScale = (type: number) => {
 		let scale = canvasStyle.scale
 		if (type === 0) {
 			scale = scale - 0.15
-			onSetScale((scale >= 0.2 ? scale : 0.2))
+			doCanvasStyle((scale >= 0.2 ? scale : 0.2))
 		} else {
 			scale = scale + 0.15
-			onSetScale((scale <= 2 ? scale : 2))
+			doCanvasStyle((scale <= 2 ? scale : 2))
 		}
 	}
 
@@ -61,7 +66,7 @@ const Footer = ({
 				defaultValue={0}
 				size="small"
 				style={{ width: 120 }}
-				onSelect={(value: number) => (value === 0) ? onCalculateScale() :  onSetScale(value / 2)}
+				onSelect={(value: number) => (value === 0) ? onCalculateScale() :  doCanvasStyle(value / 2)}
 			>
 				{selectRatio.map((item: any) => <Select.Option key={item.value} value={item.value}>{item.text}</Select.Option>)}
 			</Select>
@@ -73,7 +78,7 @@ const Footer = ({
 					min={20}
 					max={200}
 					value={canvasStyle.scale * 100}
-					onChange={(value: number) => onSetScale(value / 100)}
+					onChange={(value: number) => doCanvasStyle(value / 100)}
 				/>
 				<PlusOutlined className="slider-icon" onClick={() => onClickEidtScale(1)} />
 			</div>

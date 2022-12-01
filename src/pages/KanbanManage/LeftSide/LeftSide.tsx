@@ -69,31 +69,31 @@ const DelProject = (id: number, callback: Function) => {
         cancelText: '取消',
         onOk: () => {
             RequestDel('/KBManage/KB_Del_Group?id=' + id)
-                .then((res: any) => {
-                    if (res.status) {
-                        message.success(res.message)
-                        callback(res)
-                    } else {
-                        message.error(res.message)
-                    }
-                })
+            .then((res: any) => {
+                if (res.status) {
+                    message.success(res.message)
+                    callback(res)
+                } else {
+                    message.error(res.message)
+                }
+            })
         }
     })
 }
 // 获取项目详情
 const GetProjectDetail = (kid: number, form: FormInstance<any>) => {
     RequestGet('/KBManage/KB_Get_Detail?id=' + kid)
-        .then((res: any) => {
-            if (res.status) {
-                // 设置表单初始数据
-                form.setFieldsValue({
-                    Name: res.data.name,
-                    Remark: res.data.remark
-                })
-            } else {
-                message.error(res.message)
-            }
-        })
+    .then((res: any) => {
+        if (res.status) {
+            // 设置表单初始数据
+            form.setFieldsValue({
+                Name: res.data.name,
+                Remark: res.data.remark
+            })
+        } else {
+            message.error(res.message)
+        }
+    })
 }
 
 const LeftSide = ({
@@ -143,18 +143,18 @@ const LeftSide = ({
         if (loading) return
 
         form.validateFields()
-            .then((values: KanbanType) => {
-                setLoading(true)
-                if (title.includes('编辑')) {
-                    EditProject({ id: kId, ...values })
-                        .then(ResetForm)
-                        .finally(() => setLoading(false))
-                } else {
-                    CreateProject({ ...values, UserId: userId })
-                        .then(ResetForm)
-                        .finally(() => setLoading(false))
-                }
-            })
+        .then((values: KanbanType) => {
+            setLoading(true)
+            if (title.includes('编辑')) {
+                EditProject({ id: kId, ...values })
+                .then(ResetForm)
+                .finally(() => setLoading(false))
+            } else {
+                CreateProject({ ...values, UserId: userId })
+                .then(ResetForm)
+                .finally(() => setLoading(false))
+            }
+        })
     }
 
     // 获取项目数据

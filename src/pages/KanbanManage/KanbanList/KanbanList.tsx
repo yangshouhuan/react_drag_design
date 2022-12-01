@@ -15,13 +15,9 @@ import {
 	ExclamationCircleOutlined
 } from '@ant-design/icons'
 import ModalForm from '../components/ModalForm'
+import { FormItemType } from '../components/ModalForm'
 
-interface formItemType {
-	name: string
-	label: string
-	component: string
-}
-const formItems: formItemType[] = [
+const formItems: FormItemType[] = [
 	{
 		name: 'Name',
 		label: '看板名称',
@@ -39,28 +35,28 @@ const delKanban = (uuid: string, callback: Function) => {
 		cancelText: '取消',
 		onOk: () => {
 			RequestDel('/KBManage/KB_Del_List?uuid=' + uuid)
-				.then((res: any) => {
-					if (res.status) {
-						message.success(res.message)
-						callback()
-					} else {
-						message.error(res.message)
-					}
-				})
+			.then((res: any) => {
+				if (res.status) {
+					message.success(res.message)
+					callback()
+				} else {
+					message.error(res.message)
+				}
+			})
 		}
 	})
 }
 // 复制看板
 const copyKanban = (uuid: string, callback: Function) => {
 	RequestPost('/KBManage/KB_Copy?uuId=' + uuid)
-		.then((res: any) => {
-			if (res.status) {
-				message.success(res.message)
-				callback()
-			} else {
-				message.error(res.message)
-			}
-		})
+	.then((res: any) => {
+		if (res.status) {
+			message.success(res.message)
+			callback()
+		} else {
+			message.error(res.message)
+		}
+	})
 }
 
 // 创建看板
@@ -118,18 +114,19 @@ const KanbanList = ({
 		if (loading) return
 		setLoading(true)
 		form.validateFields()
-			.then((values: { Name: string }) => {
-				createKBList(kId, values)
-					.then((res: any) => {
-						if (res.status) {
-							form.resetFields()
-							setModalVisible(false)
-							setStatus(!status)
-						} else {
-							message.error(res.message)
-						}
-					}).finally(() => setLoading(false))
+		.then((values: { Name: string }) => {
+			createKBList(kId, values)
+			.then((res: any) => {
+				if (res.status) {
+					form.resetFields()
+					setModalVisible(false)
+					setStatus(!status)
+				} else {
+					message.error(res.message)
+				}
 			})
+			.finally(() => setLoading(false))
+		})
 	}
 
 	// 修改看板名称

@@ -1,8 +1,8 @@
 import './index.less'
-
 import { Form, Input, Button, message, Spin } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from "react-router-dom";
 
 const Login = ({
 	doLogin,
@@ -13,20 +13,20 @@ const Login = ({
 }) => {
 	const [spinning, setSprinning] = useState(false)
 	const formRef = useRef<any>(null)
+	const navigate = useNavigate()
 
-	const onLogin = (values: any) => {
+	const onLogin = async (values: any) => {
 		setSprinning(true)
-		doLogin(values)
-
-		setTimeout(() => {
-			setSprinning(false)
-		}, 5000)
+		const value = await doLogin(values)
+		setSprinning(false)
+		if (value.status) {
+			navigate('/KanbanManage', { replace: true })
+		}
 	}
 
 	useEffect(() => {
-
 		if (isLogin) {
-			window.location.replace('/#/KanbanManage')
+			navigate('/KanbanManage', { replace: true })
 		}
 		
 		if (formRef.current) {
@@ -34,10 +34,8 @@ const Login = ({
 			formRef.current?.setFieldValue('Pwd', '123456')
 		}
 
-		return () => {
-			setSprinning(false)
-		}
-	}, [isLogin])
+		return () => setSprinning(false)
+	}, [])
 
 	return (
 		<Spin spinning={spinning}>
