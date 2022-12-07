@@ -43,12 +43,6 @@ const routers: MyRoute.SyncRoute[] = [
 		]
 	},
 	{
-		name: 'KanbanDesign',
-		component: lazy(() => import('pages/KanbanDesign')),
-		path: '/KanbanDesign/:id',
-		auth: true
-	},
-	{
 		name: 'Help',
 		component: lazy(() => import('pages/Help')),
 		path: '/Help',
