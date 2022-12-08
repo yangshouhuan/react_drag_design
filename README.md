@@ -18,6 +18,8 @@
 
 ### 运行
 
+本机 node 版本: v16.13.0
+
 ```
 npm install
 npm run start
