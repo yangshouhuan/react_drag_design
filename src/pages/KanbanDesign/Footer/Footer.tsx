@@ -44,7 +44,8 @@ const Footer = ({
 	// 计算缩放
 	const onCalculateScale = () => {
 		const scale = calculateScale(screen.sw, screen.sh, canvasStyle.width, canvasStyle.height)
-		doCanvasStyle({ ...canvasStyle, scale, adaptive_scale: scale, x: 0, y: 0 })
+		doCanvasStyle({type: 'scale', value: scale})
+		
 	}
 
 	// 修改缩放
@@ -52,10 +53,12 @@ const Footer = ({
 		let scale = canvasStyle.scale
 		if (type === 0) {
 			scale = scale - 0.15
-			doCanvasStyle((scale >= 0.2 ? scale : 0.2))
+			scale = (scale >= 0.2 ? scale : 0.2)
+			doCanvasStyle({type: 'scale', value: scale})
 		} else {
 			scale = scale + 0.15
-			doCanvasStyle((scale <= 2 ? scale : 2))
+			scale = (scale <= 2 ? scale : 2)
+			doCanvasStyle({type: 'scale', value: scale})
 		}
 	}
 
@@ -66,7 +69,7 @@ const Footer = ({
 				defaultValue={0}
 				size="small"
 				style={{ width: 120 }}
-				onSelect={(value: number) => (value === 0) ? onCalculateScale() :  doCanvasStyle(value / 2)}
+				onSelect={(value: number) => (value === 0) ? onCalculateScale() : doCanvasStyle({type: 'scale', value: value / 2})}
 			>
 				{selectRatio.map((item: any) => <Select.Option key={item.value} value={item.value}>{item.text}</Select.Option>)}
 			</Select>
@@ -78,7 +81,7 @@ const Footer = ({
 					min={20}
 					max={200}
 					value={canvasStyle.scale * 100}
-					onChange={(value: number) => doCanvasStyle(value / 100)}
+					onChange={(value: number) => doCanvasStyle({type: 'scale', value: value / 100})}
 				/>
 				<PlusOutlined className="slider-icon" onClick={() => onClickEidtScale(1)} />
 			</div>

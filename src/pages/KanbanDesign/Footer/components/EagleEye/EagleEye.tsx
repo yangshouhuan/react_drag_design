@@ -135,9 +135,12 @@ const EagleEye = ({
 
 			// 计算视图面板偏移量
 			doCanvasStyle({
-				...canvasStyle,
-				x: -(left / minCanvas.width) * cW,
-				y: -(top / minCanvas.height) * cH
+				type: 'canvas',
+				value: {
+					...canvasStyle,
+					x: -(left / minCanvas.width) * cW,
+					y: -(top / minCanvas.height) * cH
+				}
 			})
 		}
 

@@ -61,11 +61,14 @@ const KanbanDesignLayout = ({
 			const sh = Number(document.documentElement.clientHeight) || 1080
 			const scale = calculateScale(sw, sh, canvasStyle.width, canvasStyle.height)
 			doCanvasStyle({
-				...canvasStyle,
-				scale: scale,
-				adaptive_scale: scale,
-				x: 0,
-				y: 0
+				type: 'canvas',
+				value: {
+					...canvasStyle,
+					scale: scale,
+					adaptive_scale: scale,
+					x: 0,
+					y: 0
+				}
 			})
 			doScreen({sw, sh})
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { RequestPost, RequestGet, RequestDel } from 'api'
+import { KB_Del_List, KB_Copy, KB_Create_List, KB_Edit_Name, get_KB_List } from 'api/kanbanmanage'
 import './index.less'
 
 import {
@@ -34,7 +35,7 @@ const delKanban = (uuid: string, callback: Function) => {
 		okText: '确定',
 		cancelText: '取消',
 		onOk: () => {
-			RequestDel('/KBManage/KB_Del_List?uuid=' + uuid)
+			KB_Del_List(uuid)
 			.then((res: any) => {
 				if (res.status) {
 					message.success(res.message)
@@ -46,9 +47,10 @@ const delKanban = (uuid: string, callback: Function) => {
 		}
 	})
 }
+
 // 复制看板
 const copyKanban = (uuid: string, callback: Function) => {
-	RequestPost('/KBManage/KB_Copy?uuId=' + uuid)
+	KB_Copy(uuid)
 	.then((res: any) => {
 		if (res.status) {
 			message.success(res.message)
@@ -59,28 +61,6 @@ const copyKanban = (uuid: string, callback: Function) => {
 	})
 }
 
-// 创建看板
-const createKBList = (kId: number, values: any) => RequestPost('/KBManage/KB_Create_List', {
-	GroupId: kId,
-	Remark: '',
-	...values
-})
-// 修改看板名称
-const updateKBName = (id: string, value: string) => RequestPost('/KBManage/KB_Edit_Name?uuId=' + id + '&name=' + value)
-// 获取看板列表
-const getKBList = (kId: number) => {
-	return new Promise((resolve, rejects) => {
-		setTimeout(() => {
-			resolve({
-				status: 1,
-				data: [
-					{uuId: '1c9416ea-ad31-48c2-8c7c-76deadd95a67', name: '看板1'},
-					{uuId: '2c9416ea-ad31-48c2-8c7c-76deadd95a67', name: '看板2'}
-				]
-			})
-		})
-	})
-}
 
 const KanbanList = ({
 	kId,
@@ -115,7 +95,8 @@ const KanbanList = ({
 		setLoading(true)
 		form.validateFields()
 		.then((values: { Name: string }) => {
-			createKBList(kId, values)
+			// 创建看板
+			KB_Create_List(kId, values)
 			.then((res: any) => {
 				if (res.status) {
 					form.resetFields()
@@ -142,7 +123,8 @@ const KanbanList = ({
 			return
 		}
 
-		updateKBName(updateUid as string, value)
+		// // 修改看板名称
+		KB_Edit_Name(updateUid as string, value)
 			.then((res: any) => {
 				if (res.status) {
 					message.success(res.message)
@@ -158,7 +140,7 @@ const KanbanList = ({
 	// 获取看板列表
 	useEffect(() => {
 		if (kId) {
-			getKBList(1).then((res: any) => {
+			get_KB_List(1).then((res: any) => {
 				if (res.status) {
 					setKanbanList(res.data)
 				} else {

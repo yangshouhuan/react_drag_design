@@ -24,7 +24,7 @@ const CanvasConfig = ({
             default:
                 break
         }
-        doCanvasStyle(canvasStyle)
+        doCanvasStyle({type: 'canvas', value: canvasStyle})
     }
 
     return (

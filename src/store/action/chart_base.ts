@@ -371,7 +371,25 @@ export const doAddHistoryAction = (data: any) => {
 }
 
 // 设置背景图层样式
-export const doCanvasStyle = createAction(T.CHART_CANVAS_STYLE)
+export const doCanvasStyle = (data: any) => {
+	return (dispatch: Function, getState: Function) => {
+		let { chart: { canvasStyle } } = getState()
+		
+		switch (data.type) {
+			case 'scale':
+				canvasStyle.scale = data.value
+				// canvasStyle.adaptive_scale = data.value
+				canvasStyle.x = 0
+				canvasStyle.y = 0
+				break
+			default:
+				canvasStyle = data.value
+				break
+		}
+
+		dispatch(createAction(T.CHART_CANVAS_STYLE)(canvasStyle))
+	}
+}
 // 行为组件位置
 export const doActionStyle = createAction(T.ACTION_STYLE)
 

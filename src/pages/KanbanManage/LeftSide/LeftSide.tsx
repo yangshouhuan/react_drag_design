@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { RequestPost, RequestDel, RequestGet } from 'api'
+import { get_KB_Group, KB_Edit_Group, KB_Create_Group, KB_Del_Group, KB_Get_Detail } from 'api/kanbanmanage'
+
 import './index.less'
 
 import {
@@ -43,23 +45,7 @@ const formItems: formItemType[] = [
     },
 ]
 
-// 获取分组列表
-const getKBGroup = (uid: number) => {
-    return new Promise((resolve, rejects) => {
-        setTimeout(() => {
-            resolve({
-                status: 1,
-                data: [
-                    { id: 1, name: '看板分组1' },
-                    { id: 2, name: '看板分组2' }
-                ]
-            })
-        }, 0)
-    })
-}
 // 增删改项目
-const EditProject = (params: any) => RequestPost('/KBManage/KB_Edit_Group', params)
-const CreateProject = (params: any) => RequestPost('/KBManage/KB_Create_Group', params)
 const DelProject = (id: number, callback: Function) => {
     Modal.confirm({
         title: '删除提示',
@@ -68,7 +54,7 @@ const DelProject = (id: number, callback: Function) => {
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
-            RequestDel('/KBManage/KB_Del_Group?id=' + id)
+            KB_Del_Group(id)
             .then((res: any) => {
                 if (res.status) {
                     message.success(res.message)
@@ -80,9 +66,10 @@ const DelProject = (id: number, callback: Function) => {
         }
     })
 }
+
 // 获取项目详情
 const GetProjectDetail = (kid: number, form: FormInstance<any>) => {
-    RequestGet('/KBManage/KB_Get_Detail?id=' + kid)
+    KB_Get_Detail(kid)
     .then((res: any) => {
         if (res.status) {
             // 设置表单初始数据
@@ -146,11 +133,11 @@ const LeftSide = ({
         .then((values: KanbanType) => {
             setLoading(true)
             if (title.includes('编辑')) {
-                EditProject({ id: kId, ...values })
+                KB_Edit_Group({ id: kId, ...values })
                 .then(ResetForm)
                 .finally(() => setLoading(false))
             } else {
-                CreateProject({ ...values, UserId: userId })
+                KB_Create_Group({ ...values, UserId: userId })
                 .then(ResetForm)
                 .finally(() => setLoading(false))
             }
@@ -159,7 +146,7 @@ const LeftSide = ({
 
     // 获取项目数据
     useEffect(() => {
-        getKBGroup(1).then((res: any) => {
+        get_KB_Group(1).then((res: any) => {
             if (res.status) {
                 setKanbanMenus(res.data || [])
                 if (res.data?.length > 0) {
