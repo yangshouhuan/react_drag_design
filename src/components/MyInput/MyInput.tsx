@@ -7,7 +7,7 @@ const MyInput = ({
     props,
     size
 } : {
-    onBlur: (e: any) => void
+    onBlur: (e: any, value?: any) => void
     value: any
     props?: any
     size?: string
@@ -23,7 +23,7 @@ const MyInput = ({
             {...props}
             size={size || "small"}
             value={newValue}
-            onBlur={() => onBlur(newValue)}
+            onBlur={(e: any) => onBlur(e, newValue)}
             onChange={(e: any) => {
                 e.persist()
                 setNewValue(e.target.value)      

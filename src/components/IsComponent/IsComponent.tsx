@@ -35,7 +35,7 @@ const IsComponent = ({
             return <MyInput
                         value={value}
                         props={data.types}
-                        onBlur={(value: any) => onBlur(value)}
+                        onBlur={(e: any, value: any) => onBlur(value)}
                     />
         case 'InputNumber':
             return  <MyNumberInput

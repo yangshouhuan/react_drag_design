@@ -13,7 +13,6 @@ const GrnealComponent = ({
     onChange: Function
     activeId: number
 }) => {
-    const { width, height, x, y, transform, name } = chart
 
     // 处理修改值事件
     const handleChange = useCallback((e: any, type: string) => {
@@ -30,35 +29,35 @@ const GrnealComponent = ({
                     data.name = value.length === 0 ? chart.name : value
                     break
                 case 'w':
-                    if (flag = (width !== value)) {
+                    if (flag = (chart.width !== value)) {
                         data.width = value
                         data.height = chart.height
                         type = 'wh'
                     }
                     break
                 case 'h':
-                    if (flag = (height !== value)) {
+                    if (flag = (chart.height !== value)) {
                         data.width = chart.width
                         data.height = value
                         type = 'wh'
                     }
                     break
                 case 'x':
-                    if (flag = (x !== value)) {
+                    if (flag = (chart.x !== value)) {
                         data.x = value
-                        data.y = y
+                        data.y = chart.y
                         type = 'xy'
                     }
                     break
                 case 'y':
-                    if (flag = (y !== value)) {
+                    if (flag = (chart.y !== value)) {
                         data.y = value
-                        data.x = x
+                        data.x = chart.x
                         type = 'xy'
                     }
                     break
                 case 'rotate':
-                    if (flag = (transform !== value)) {
+                    if (flag = (chart.transform !== value)) {
                         data.rotate = value
                     }
                     break
@@ -72,22 +71,22 @@ const GrnealComponent = ({
             <div className='flex-both base-item'>
                 <div className='base-label'>图表名称</div>
                 <div className='base-right'>
-                    <MyInput onBlur={(e: any) => handleChange(e, 'name')} value={name} />
+                    <MyInput onBlur={(e: any) => handleChange(e, 'name')} value={chart.name} />
                 </div>
             </div>
             {activeId && !chart.is_group ? <>
                 <div className='flex-both base-item'>
                     <div className='base-label'>图表尺寸</div>
                     <div className='base-right'>
-                        <InputNumber size="small" value={width} min={0} onBlur={(e: any) => handleChange(e, 'w')} />
-                        <InputNumber size="small" value={height} min={0} onBlur={(e: any) => handleChange(e, 'h')} />
+                        <InputNumber size="small" value={chart.width} min={0} onBlur={(e: any) => handleChange(e, 'w')} />
+                        <InputNumber size="small" value={chart.height} min={0} onBlur={(e: any) => handleChange(e, 'h')} />
                     </div>
                 </div>
                 <div className='flex-both base-item'>
                     <div className='base-label'>图表位置</div>
                     <div className='base-right'>
-                        <InputNumber size="small" value={x} onBlur={(e: any) => handleChange(e, 'x')} />
-                        <InputNumber size="small" value={y} onBlur={(e: any) => handleChange(e, 'y')} />
+                        <InputNumber size="small" value={chart.x} onBlur={(e: any) => handleChange(e, 'x')} />
+                        <InputNumber size="small" value={chart.y} onBlur={(e: any) => handleChange(e, 'y')} />
                     </div>
                 </div>
                 <div className='flex-both base-item'>
@@ -106,7 +105,7 @@ const GrnealComponent = ({
                 <div className='flex-both base-item'>
                     <div className='base-label'>旋转角度</div>
                     <div className='base-right'>
-                        <InputNumber size="small" value={transform} onBlur={(e: any) => handleChange(e, 'rotate')} />
+                        <InputNumber size="small" value={chart.transform} onBlur={(e: any) => handleChange(e, 'rotate')} />
                     </div>
                 </div>
             </> : <></>}
