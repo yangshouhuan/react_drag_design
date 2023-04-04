@@ -15,7 +15,6 @@ const layerStyle = (allVisible: boolean, myVisible: boolean) => {
 const mapStateToProps = (state: any) => {
 	return {
 		layerStyle: layerStyle(state.visible.all_layer_visible, state.visible.my_layer_visible),
-		chartOptionList: state.defaultJson.chartOptionList
 	}
 }
 

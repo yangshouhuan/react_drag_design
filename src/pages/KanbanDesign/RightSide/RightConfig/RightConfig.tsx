@@ -5,6 +5,7 @@ import CreateConfigComponent from '../components/CreateConfigComponent';
 import GrnealComponent from '../components/GrnealComponent';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import CanvasConfig from '../components/CanvasConfig';
+import chartConfigList from 'chart-config/chart-base-config'
 
 const { Panel } = Collapse
 
@@ -15,7 +16,6 @@ const RightConfig = ({
     activeId,
     canvasStyle,
     doCanvasStyle,
-    chartConfigList
 }: {
     activeChart: ChartType
     dispatchBaseConfig: Function
@@ -23,7 +23,6 @@ const RightConfig = ({
     activeId: number
     canvasStyle: any
     doCanvasStyle: Function
-    chartConfigList: any
 }) => {
     const [activeKey, setActiveKey] = useState<string[]>([])
 

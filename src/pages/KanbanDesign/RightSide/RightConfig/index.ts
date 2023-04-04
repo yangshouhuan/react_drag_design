@@ -7,7 +7,6 @@ const mapStateToProps = (state: any) => {
         activeChart: state.chart.activeChart,
         activeId: state.chart.activeId,
         canvasStyle: state.chart.canvasStyle,
-        chartConfigList: state.defaultJson.chartConfigList
     }
 }
 

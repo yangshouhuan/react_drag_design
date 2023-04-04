@@ -158,7 +158,8 @@ const KanbanList = ({
 				<div className="add-kanban" onClick={() => changeModalVisible(true)}>+</div>
 				{kanbanList.map((item: any) => (
 					<div className="kanban-item" key={item.uuId}>
-						<div className="edit-kanban" onClick={() => window.open('/#/KanbanDesign/' + item.uuId)}>
+						{/* <div className="edit-kanban" onClick={() => window.open('/#/KanbanDesign/' + item.uuId)}> */}
+						<div className="edit-kanban" onClick={() => window.open('/KanbanDesign/' + item.uuId)}>
 							<img src={require('assetss/images/PreviewImg.png').default} alt={item.name} />
 							<div className="mask"></div>
 							<span className="edit-kanban-icon"><EditOutlined /></span>
@@ -194,7 +195,8 @@ const KanbanList = ({
 								<span
 									title="预览"
 									className="note-icon"
-									onClick={() => window.open('/#/Preview/' + item.uuId)}
+									// onClick={() => window.open('/#/Preview/' + item.uuId)}
+									onClick={() => window.open('/Preview/' + item.uuId)}
 								><EyeOutlined /></span>
 							</span>
 						</div>

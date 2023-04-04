@@ -54,7 +54,8 @@ const Header = ({
 			kb_style: canvasStyle || {}
 		})
 		// window.open('/#/KanbanPreview/id')
-		window.open('/#/KanbanPreview/1c9416ea-ad31-48c2-8c7c-76deadd95a67')
+		// window.open('/#/KanbanPreview/1c9416ea-ad31-48c2-8c7c-76deadd95a67')
+		window.open('/KanbanPreview/1c9416ea-ad31-48c2-8c7c-76deadd95a67')
 	}
 	
 	return (
@@ -83,7 +84,6 @@ const Header = ({
 				</Link>
 			</div>
 			<div className="flex-end header-right">
-				<a className='use-help' title='使用帮助' href='/#/Help' target='_blank'><span>使用帮助</span><QuestionCircleOutlined /></a>
 				<span
 					className={classnames({ 'icon-span': true, active: side_visible })}
 					title="隐藏"

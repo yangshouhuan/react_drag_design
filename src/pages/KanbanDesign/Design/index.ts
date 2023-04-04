@@ -25,6 +25,7 @@ const mapStateToProps = (state: any) => {
 		chartData: state.chart.chartData,
 		activeId: state.chart.activeId,
 		activeChart: state.chart.activeChart,
+		canvasStyle: state.chart.canvasStyle
 	}
 }
 

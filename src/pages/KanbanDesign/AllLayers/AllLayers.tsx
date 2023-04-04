@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import classnames from 'classnames'
 import datavOptions from 'chart-config/chart-options/datav/options'
 import echartOptions from 'chart-config/chart-options/echarts/options'
+import chartOptionList from 'chart-config/chart-options'
 import './index.less'
 
 import {
@@ -19,12 +20,10 @@ const AllLayers = ({
 	layerStyle,
 	handleHeaderVisible,
 	doAddChart,
-	chartOptionList
 } : {
 	handleHeaderVisible: Function
 	layerStyle: any
 	doAddChart: Function
-	chartOptionList: AllChartType[]
 }) => {
 	const [activeId, setActiveId] = useState('0-0')
 	const [activeList, setActiveList] = useState<BaseChartType[]>([])
@@ -115,6 +114,7 @@ const AllLayers = ({
 			<div className="custom-scroll left-layer-classify">
 				{chartOptionList.map((item: AllChartType) => (
 					<div
+						title={item.title}
 						className={classnames({'classify-item': true, 'classify-active': activeId === item.id})}
 						key={item.id}
 						onClick={() => setActiveId(item.id)}

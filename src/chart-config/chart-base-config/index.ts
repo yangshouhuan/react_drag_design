@@ -5,7 +5,8 @@ import mapTypeList from './echarts/map'
 import pieTypeList from './echarts/pie'
 import radarTypeList from './echarts/radar'
 import scatterTypeList from './echarts/scatter'
-
+import earthTypeList from './echarts/earth'
+import earthPathTypeList from './echarts/earthPath'
 
 import commonlyTypeList from './datav/commonly'
 import borderTypeList from './datav/border'
@@ -67,7 +68,17 @@ const AllChartType = [
         title: '散点图',
         id: '0-7',
         children: scatterTypeList
-    }
+    },
+    {
+        title: '3D 地球',
+        id: '0-8',
+        children: earthTypeList
+    },
+    {
+        title: '3D 路径图',
+        id: '0-9',
+        children: earthPathTypeList
+    },
 ]
 
 export default AllChartType

@@ -11,7 +11,7 @@ import {
 } from "@ant-design/icons"
 import './index.less'
 import ReactDOM from 'react-dom'
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ChartType } from "types/chart"
 
 const action = [
@@ -51,20 +51,21 @@ const ActionComponent = ({
     isShow,
     chart,
     onActionClick,
-    left,
-    top,
-    onSetActionShow
+	actionStyle,
+	doActionVisible,
+	screen
 }: {
     isShow: boolean
     chart: ChartType | null
     onActionClick: (type: string) => void
-    left: number
-    top: number
-    onSetActionShow: (flag: boolean) => void
+	actionStyle: any
+	doActionVisible: Function
+	screen: any
 }) => {
+    
 
     useEffect(() => {
-        const click = () => onSetActionShow(false)
+        const click = () => doActionVisible(false)
         
         if (isShow) {
             window.addEventListener('click', click)
@@ -80,8 +81,25 @@ const ActionComponent = ({
         }
     }, [isShow])
 
+    // 行为组件坐标
+	const leftAndTop = useMemo(() => {
+		const between = screen.sh - actionStyle.y
+
+		if (between < 390) {
+			return {
+				x: actionStyle.x,
+				y: actionStyle.y - 390
+			}
+		}
+
+		return {
+			x: actionStyle.x,
+			y: actionStyle.y
+		}
+	}, [actionStyle])
+
     return ReactDOM.createPortal(
-        <div className="chart-manage-action" style={{ display: isShow ? 'block' : 'none', left, top }}>
+        <div className="chart-manage-action" style={{ display: isShow ? 'block' : 'none', left: leftAndTop.x, top: leftAndTop.y }}>
             <p title="添加分组" onClick={() => onActionClick('add_group')}>
                 <span className="icon-span"><FolderOpenOutlined /></span>添加分组
             </p>

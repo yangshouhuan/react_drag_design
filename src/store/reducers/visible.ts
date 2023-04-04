@@ -6,7 +6,8 @@ export const updateState = (state: any, value: any) => {
 
 const data = {
     side_visible: true,  // 右侧面板
-    all_layer_visible: false, // 所有图层
+    // all_layer_visible: false, // 所有图层
+    all_layer_visible: true, // 所有图层
     my_layer_visible: true,  // 我的图层
     recycle_visible: false,  // 回收站
     config_side_visible: true,  // 显示配置面板

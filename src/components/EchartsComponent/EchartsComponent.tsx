@@ -1,15 +1,15 @@
 import * as echarts from 'echarts'
 import { useEffect, useRef } from 'react'
 import { ChartType } from 'types/chart'
+import geoJson from 'chart-config/shared/geoJSON.json'
+import 'echarts-gl'
 
 const EchartsComponent = ({
     chart,
     chartStyle,
-    getJson
 } : {
     chart: ChartType
     chartStyle?: any
-    getJson: any
 }) => {
     const refVal = useRef<echarts.ECharts | null>(null)
     const Id = 'eMain' + chart.id
@@ -19,8 +19,11 @@ const EchartsComponent = ({
         refVal.current = echarts.init(document.getElementById(Id)!)
 
         if (!chart.is_group) {
-            if (chart.option_id.includes('0-3|')) {  // 地图
-                echarts.registerMap("china", { geoJSON: getJson, specialAreas: {} });
+            if (chart.component === 'map') {  // 地图
+                echarts.registerMap("china", { geoJSON: geoJson as any, specialAreas: {} });
+            } else if (chart.component === '3Dmap') {
+                console.log(111)
+                refVal.current?.setOption(chart.config)
             } else {
                 refVal.current?.setOption(chart.config)
             }

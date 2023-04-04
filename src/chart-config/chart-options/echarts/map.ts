@@ -6,7 +6,7 @@ const mapChartList: BaseChartType[] = [
         id: 31,
         option_id: '0-3|0-1',
         name: '中国飞线图',
-        component: 'div',
+        component: 'map',
         is_echarts: true,
         config: {
             backgroundColor: '',

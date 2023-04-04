@@ -1,7 +1,7 @@
 import { Input, InputNumber, Slider } from "antd"
 import MyInput from "components/MyInput"
 import SketchExample from "components/SketchExample"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback } from "react"
 import { ChartType } from "types/chart"
 
 const GrnealComponent = ({

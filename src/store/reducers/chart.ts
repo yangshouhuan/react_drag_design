@@ -1,12 +1,11 @@
 import * as T from '../constants'
 import { updateState } from './visible'
-import chartData from 'chart-config/shared/default-chart-data.json'
 
 const data = {
   kId: null, // 看板id
 
   // 看板数据
-  chartData: [...chartData],  // 所以图层数据
+  chartData: [],
   activeId: 0,  // 当前激活图层id
   activeChart: null,  // 当前修改图层数据
   openGroupIds: [], // 打开的分组id

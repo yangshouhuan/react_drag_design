@@ -43,12 +43,6 @@ const routers: MyRoute.SyncRoute[] = [
 		]
 	},
 	{
-		name: 'Help',
-		component: lazy(() => import('pages/Help')),
-		path: '/Help',
-		auth: true
-	},
-	{
 		name: 'Error404',
 		component: lazy(() => import('pages/Error404')),
 		path: '*'

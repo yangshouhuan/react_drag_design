@@ -6,6 +6,8 @@ import mapChartList from './echarts/map'
 import pieChartList from './echarts/pie'
 import radarChartList from './echarts/radar'
 import scatterChartList from './echarts/scatter'
+import earthChartList from './echarts/earth'
+import earthPathChartList from './echarts/earthpath'
 
 import commonlyChartList from './datav/commonly'
 import borderChartList from './datav/border'
@@ -67,6 +69,16 @@ const AllChart: AllChartType[] = [
         title: '散点图',
         id: '0-7',
         children: scatterChartList
+    },
+    {
+        title: '3D 地球',
+        id: '0-8',
+        children: earthChartList
+    },
+    {
+        title: '3D 路径图',
+        id: '0-9',
+        children: earthPathChartList
     }
 ]
 

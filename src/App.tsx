@@ -9,9 +9,11 @@ function App() {
   return (
       <Provider store={store}>
         {/* 需要配置 BrowserRouter 路由才能用 */}
-        <HashRouter>
+        {/* <HashRouter> */}
+          <BrowserRouter>
             <Routers />
-        </HashRouter>
+          </BrowserRouter>
+        {/* </HashRouter> */}
       </Provider>
   )
 }

@@ -6,13 +6,11 @@ import thunk from 'redux-thunk'
 import user from './reducers/user'
 import visible from './reducers/visible'
 import chart from './reducers/chart'
-import defaultJson from './reducers/default_json'
 
 const totalActions = combineReducers({
 	user,
 	visible,
-	chart,
-	defaultJson
+	chart
 })
 
 const store = createStore(totalActions, applyMiddleware(thunk, promiseMiddleware, createLogger))
