@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
 import './index.less'
 import ponit from 'assetss/icons/point.png'
-import { useParams } from 'react-router-dom'
 
 // 头
 import Header from './Header'
@@ -15,9 +13,12 @@ import AllLayers from './AllLayers'
 import RightSide from './RightSide'
 // 主要内容 设计
 import Design from './Design'
+// 行为组件
 import Action from './Action'
-import { calculateScale } from 'layouts/KanbanDesignLayout'
-import { ChartType } from 'types/chart'
+// 辅助线
+import AuxiliaryLine from './AuxiliaryLine'
+// 子组件
+import ChildrenCmpt from './ChildrenCmpt'
 
 const KanbanDesign = () => {
 
@@ -27,12 +28,15 @@ const KanbanDesign = () => {
 			style={{ backgroundImage: 'url(' + ponit + ')' }}
 			onContextMenuCapture={(e: any) => e.preventDefault()}
 		>
+			
+			<AuxiliaryLine />
 			<Header />
 			<LeftSide />
 			<AllLayers />
 			<Design />
 			<RightSide />
 			<Footer />
+			{/* <ChildrenCmpt /> */}
 			{/* 行为组件 */}
 			<Action />
 		</div>

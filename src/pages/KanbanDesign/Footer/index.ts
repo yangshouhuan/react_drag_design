@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { doCanvasStyle } from 'store/action/chart_base'
+import { doCanvasScale, doCanvasStyle } from 'store/action/chart_base'
 import Footer from './Footer'
 
 const footerStyle = (data: any) => {
@@ -14,6 +14,7 @@ const footerStyle = (data: any) => {
 const mapDispatchToProps = (dispatch: Function) => {
     return {
         doCanvasStyle: (value: any) => dispatch(doCanvasStyle(value)),
+		doCanvasScale: (value: any) => dispatch(doCanvasScale(value))
     }
 }
 
@@ -21,9 +22,11 @@ const mapStateToProps = (state: any) => {
 	return {
 		footerStyle: footerStyle(state.visible),
 		activeId: state.chart.activeId,
-		canvasStyle: state.chart.canvasStyle,
 		chartData: state.chart.chartData,
-		screen: state.chart.screen
+		screen: state.chart.screen,
+		canvasChart: state.chart.canvasChart,
+		scale: state.chart.scale,
+		adaptive_scale: state.chart.adaptive_scale
 	}
 }
 

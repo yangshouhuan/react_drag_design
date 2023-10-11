@@ -9,9 +9,8 @@ const mapStateToProps = (state: any) => {
 		side_visible: state.visible.side_visible,
 		my_layer_visible: state.visible.my_layer_visible,
 		recycle_visible: state.visible.recycle_visible,
-		activeChart: state.chart.activeChart,
-		chartData: state.chart.chartData,
-		canvasStyle: state.chart.canvasStyle
+		all_layer_visible: state.visible.all_layer_visible,
+		kId: state.chart.kId
 	}
 }
 
@@ -19,7 +18,6 @@ const mapDispatchToProps = (dispatch: Function) => {
 	return {
 		handleHeaderVisible: (type: string, values = false) => dispatch(handleHeaderVisible(type, values)),
 		logout: () => dispatch(doLogout()),
-		doSourceType: (value: any) => dispatch(doSourceType(value))
 	}
 }
 

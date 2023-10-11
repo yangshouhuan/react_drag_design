@@ -14,7 +14,7 @@ import {
 import EagleEye from './components/EagleEye'
 import { ChartType } from 'types/chart'
 import classNames from 'classnames'
-import { calculateScale } from 'layouts/KanbanDesignLayout'
+import { calculateScale } from 'store/core/chart'
 
 const selectRatio = [
 	{ value: 0, text: '自适应' },
@@ -28,38 +28,41 @@ const Footer = ({
 	footerStyle,
 	chartData,
 	activeId,
-	canvasStyle,
+	canvasChart,
 	doCanvasStyle,
-	screen
+	doCanvasScale,
+	screen,
+	scale,
+	adaptive_scale
 }: {
 	footerStyle: Object
 	chartData: ChartType[]
 	activeId: number
-	canvasStyle: any
-	doCanvasStyle: Function,
+	canvasChart: ChartType
+	doCanvasStyle: Function
+	doCanvasScale: Function
 	screen: any
+	scale: number
+	adaptive_scale: number
 }) => {
 	const [eyeVisible, setEyeVisible] = useState(true)
 
 	// 计算缩放
 	const onCalculateScale = () => {
-		const scale = calculateScale(screen.sw, screen.sh, canvasStyle.width, canvasStyle.height)
-		doCanvasStyle({type: 'scale', value: scale})
-		
+		const newscale = calculateScale(screen.sw, screen.sh, canvasChart.width, canvasChart.height)
+		doCanvasScale({ scale: newscale })
 	}
 
 	// 修改缩放
 	const onClickEidtScale = (type: number) => {
-		let scale = canvasStyle.scale
 		if (type === 0) {
 			scale = scale - 0.15
 			scale = (scale >= 0.2 ? scale : 0.2)
-			doCanvasStyle({type: 'scale', value: scale})
 		} else {
 			scale = scale + 0.15
 			scale = (scale <= 2 ? scale : 2)
-			doCanvasStyle({type: 'scale', value: scale})
 		}
+		doCanvasScale({ scale })
 	}
 
 	return (
@@ -69,7 +72,7 @@ const Footer = ({
 				defaultValue={0}
 				size="small"
 				style={{ width: 120 }}
-				onSelect={(value: number) => (value === 0) ? onCalculateScale() : doCanvasStyle({type: 'scale', value: value / 2})}
+				onSelect={(value: number) => (value === 0) ? onCalculateScale() : doCanvasScale({ scale: value / 2 })}
 			>
 				{selectRatio.map((item: any) => <Select.Option key={item.value} value={item.value}>{item.text}</Select.Option>)}
 			</Select>
@@ -80,8 +83,8 @@ const Footer = ({
 					style={{ width: 150, height: 'auto' }}
 					min={20}
 					max={200}
-					value={canvasStyle.scale * 100}
-					onChange={(value: number) => doCanvasStyle({type: 'scale', value: value / 100})}
+					value={scale * 100}
+					onChange={(value: number) => doCanvasScale({ scale: value / 100 })}
 				/>
 				<PlusOutlined className="slider-icon" onClick={() => onClickEidtScale(1)} />
 			</div>
@@ -89,7 +92,9 @@ const Footer = ({
 			{/* 鹰眼 */}
 			<EagleEye
 				doCanvasStyle={doCanvasStyle}
-				canvasStyle={canvasStyle}
+				chart={canvasChart}
+				scale={scale}
+				adaptive_scale={adaptive_scale}
 				activeId={activeId}
 				eyeVisible={eyeVisible}
 				chartData={chartData}

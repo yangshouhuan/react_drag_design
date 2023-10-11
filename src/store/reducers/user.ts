@@ -12,7 +12,8 @@ import { updateState } from './visible'
 const data = {
   token: getToken(),
   user_id: getUserId(),
-  isLogin: getToken() ? true : false
+  isLogin: getToken() ? true : false,
+  role: ''
 }
 
 const user = (state = data, action: any) => {
@@ -20,7 +21,6 @@ const user = (state = data, action: any) => {
     case T.SUCCESS_LOGIN:
       setToken(action.payload.token)
       setUserId(action.payload.user_id)
-
       return updateState(state, {
         token: action.payload.token,
         user_id: action.payload.user_id,
@@ -28,7 +28,6 @@ const user = (state = data, action: any) => {
       })
     case T.LOGOUT:
       removeUserInfo()
-      
       return updateState(state, {
         token: null,
         user_id: null,

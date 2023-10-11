@@ -1,6 +1,7 @@
 import { createAction } from 'redux-actions'
 import * as T from '../constants'
 import { Modal } from 'antd'
+import { login } from 'api/user'
 
 const { confirm } = Modal
 
@@ -29,33 +30,42 @@ export const doLogout = () => {
 
 // 登录
 export const doLogin = (value: any) => {
-    return (dispatch: Function, getState: Function) => {
-        if (getState().user.isLogin) return
-        
+    return (dispatch: Function) => {
         return new Promise((resolve, reject) => {
-            // 模仿登录请求
-            new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    resolve({
-                        status: 1,
-                        data: {
-                            token: 'test_token',
-                            id: 1
-                        }
-                    })
-                }, 1000)
-            })
-            .then((res: any) => {
-                if (res.status) {
-                    dispatch(createAction(T.SUCCESS_LOGIN)({
-                        token: res.data.token,
-                        user_id: res.data.id
-                    }))
+            // return (
+            //     login(value)
+            //     .then((res: any) => {
+            //         if (res.status) {
+            //             dispatch(createAction(T.SUCCESS_LOGIN)({
+            //                 token: res.data.token,
+            //                 user_id: res.data.id
+            //             }))
+            //         }
+            //         resolve(res)
+            //     }).catch(() => {
+            //         reject('error')
+            //     })
+            // )
+            setTimeout(() => {
+                const res = {
+                    message: 'success',
+                    status: true,
+                    data: {
+                        create_time: "2023-09-06 12:23:15",
+                        name: "18888888888",
+                        pwd: null,
+                        role: "lv1",
+                        token: "9d2f1b4c-4a12-470d-99f1-f3531a158f9d",
+                        user_id: 1,
+                        id: 1
+                    }
                 }
+                dispatch(createAction(T.SUCCESS_LOGIN)({
+                    token: res.data.token,
+                    user_id: res.data.id
+                }))
                 resolve(res)
-            }).catch(error => {
-                reject(error)
-            })
+            }, 300)
         })
     }
 }

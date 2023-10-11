@@ -1,19 +1,19 @@
 import { connect } from 'react-redux'
-import { doBaseConfig, doCanvasStyle, doImportantConfig } from 'store/action/chart_base'
+import { doChartActionManage, doImportantConfig, doCanvasStyle } from 'store/action/chart_base'
 import RightConfig from './RightConfig'
 
 const mapStateToProps = (state: any) => {
     return {
-        activeChart: state.chart.activeChart,
+        activeChart: Object.assign({}, state.chart.activeChart),
         activeId: state.chart.activeId,
-        canvasStyle: state.chart.canvasStyle,
+        canvasChart: state.chart.canvasChart
     }
 }
 
 const mapDispatchToProps = (dispatch: Function) => {
     return {
-        dispatchBaseConfig: (value: any) => dispatch(doBaseConfig(value)),
-		dispatchImportantConfig: (value: any) => dispatch(doImportantConfig(value)),
+        dispatchBaseConfig: (value: any) => dispatch(doChartActionManage(value)),
+		doImportantConfig: (value: any) => dispatch(doImportantConfig(value)),
         doCanvasStyle: (value: any) => dispatch(doCanvasStyle(value))
     }
 }

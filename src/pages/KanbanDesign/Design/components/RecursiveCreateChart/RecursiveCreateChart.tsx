@@ -1,5 +1,5 @@
 import { ChartType } from "types/chart"
-import CrateEchartComponent from "../CrateChartComponent"
+import CrateChart from "../CrateChart"
 
 // 递归创建图层
 const RecursiveCreateChart = ({
@@ -22,30 +22,31 @@ const RecursiveCreateChart = ({
         if (chart.is_hide || chart.is_del) return <></>
 
         return <>
-            {!chart.is_group ? <>
-                <CrateEchartComponent
-                    key={chart.id}
-                    onBaseConfig={onBaseConfig}
-                    chart={{...chart}}
-                    onSetActiveId={() => onSetActiveId(chart.id)}
-                    isActive={activeId === chart.id}
-                    onRightKeyClick={onRightKeyClick}
-                    activeId={activeId}
-                    onDragStart={onDragStart}
-                />
-            </> : <>
-                {chart.children?.map((chartItem: ChartType) => (
+            {chart.is_group ? <>
+                {chart.children?.map((item: ChartType) => (
                     <RecursiveCreateChart
-                        key={chartItem.id}
+                        key={item.chart_id}
                         onBaseConfig={onBaseConfig}
                         onSetActiveId={onSetActiveId}
-                        chart={chartItem}
+                        chart={item}
                         activeId={activeId}
                         onRightKeyClick={onRightKeyClick}
                         onDragStart={onDragStart}
                     />
                 ))}
-            </>}
+            </> :  <>
+                <CrateChart
+                    key={chart.chart_id}
+                    onBaseConfig={onBaseConfig}
+                    chart={chart}
+                    onSetActiveId={() => onSetActiveId(chart.chart_id)}
+                    isActive={activeId === chart.chart_id}
+                    onRightKeyClick={onRightKeyClick}
+                    activeId={activeId}
+                    onDragStart={onDragStart}
+                />
+            </>
+            }
         </>
 }
 

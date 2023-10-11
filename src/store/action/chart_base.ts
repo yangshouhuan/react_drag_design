@@ -1,47 +1,79 @@
 import * as T from '../constants'
 import { createAction } from "redux-actions"
 import {
-	getMoveStartEndParent,
-	getNextLayerParent,
-	getUpLayerParent,
-	loopGetParent,
-	loopResetFatherIds,
-	resetsOpenIds,
+	getActiveChart,
+	getCreateChartByCid,
+	moveChart,
+	loopGetData,
+	loopGetLastData,
+	loopGetNextData,
 	updateBaseConfig,
-	updateImportantConfig
+	loopGetLastAndNextData,
+	getChartDataByIds,
+	resetChartId
 } from "store/core/chart"
-import { getActiveChart } from "store/core/getters"
-import { ChartType } from 'types/chart'
-import { parseTime } from 'utils/validate'
-import { defaultGroup, defaultSource, getNewChartId } from '../../chart-config/shared/default_data'
-import { doActionVisible } from './visible'
+import { ActionEnumType, ActionType, ChartType } from 'types/chart'
+import { isArray, parseTime } from 'utils/validate'
+import { deepClone, isObject } from 'utils/shared'
+
+import { backupsChart, doSaveAction } from './shortcut_key'
+import { defaultChart } from 'chart-config-json/shared/default_data'
+import { getDesignData } from 'api/design_api'
 
 // 设置看板id
-export const setKanBanId = createAction(T.SOCKET_KANBAN_Id)
-// 设置打开分组
-export const setGroupIds = createAction(T.CHART_GROUP_IDS)
+export const setKanBanId = (kid: string) => {
+	return (dispatch: Function) => {
+		dispatch(getChartDataByKid(kid))
+		dispatch(createAction(T.SOCKET_KANBAN_Id)(kid))
+	}
+}
 // 设置可视界面
 export const setScreen = createAction(T.CHART_SCREEN)
+// 行为组件位置
+export const doActionStyle = createAction(T.ACTION_STYLE)
+// 设置缩放
+export const doCanvasScale = createAction(T.CHART_CANVAS_SCALE)
+
+// 获取当前看板数据
+export const getChartDataByKid = (kid: string) =>{
+	return (dispatch: Function) => {
+		getDesignData(kid)
+		.then((res: any) => {
+			if (res.status) {
+				dispatch(createAction(T.CHART_DATA)(res.data))
+			} else {
+				console.log('请求错误')
+			}
+		})
+	}
+}
+
 // 更新激活项
-export const doChartActiveId = (id: any) => {
+export const doChangeActiveById = (cid: number) => {
 	return (dispatch: Function, getState: Function) => {
-		if (id) {
-			const state = getState()
-			const { chartData, activeId, openGroupIds } = state.chart
-			if (id !== activeId) {
-				const chart = getActiveChart(chartData, id)
-				const openIds = resetsOpenIds(openGroupIds, chart?.father_ids || [])
-				dispatch(setGroupIds(openIds))
+		const { chartData, expandedKeys, activeChart, activeId } = getState().chart
+		if (cid) {
+			if (cid !== activeId) {
+				const { chart, cids } = getActiveChart(chartData, cid)
 				dispatch(createAction(T.CHART_ACTIVE_ID)({
 					activeChart: chart,
-					activeId: id
+					activeId: cid
 				}))
+				// 设置打开分组
+				const keys = Array.from(new Set([...expandedKeys, ...cids]))
+				dispatch(createAction(T.CHART_EXPANDED_KEYS)(keys))
+			} else if (activeChart.is_group) {
+				// 设置打开分组
+				const index = expandedKeys.indexOf(cid)
+				if (index !== -1) {
+					expandedKeys.splice(index, 1)
+				} else {
+					expandedKeys.push(cid)
+				}
+				dispatch(createAction(T.CHART_EXPANDED_KEYS)([...expandedKeys]))
 			}
 		} else {
-			dispatch(createAction(T.CHART_ACTIVE_ID)({
-				activeChart: null,
-				activeId: null
-			}))
+			dispatch(createAction(T.CHART_DEFAULT_CHART)())
 		}
 	}
 }
@@ -49,232 +81,433 @@ export const doChartActiveId = (id: any) => {
 // 修改基本属性值
 export const doBaseConfig = (value: any) => {
 	return (dispatch: Function, getState: Function) => {
-		const { chartData, activeId, openGroupIds } = getState().chart
-		const chart = getActiveChart(chartData, activeId)
-		const newData = updateBaseConfig(chart as ChartType, value, activeId, openGroupIds)
-
-		dispatch(createAction(T.CHART_SET_BASE_CONFIG)({
-			chartData: [...chartData],
-			...newData
-		}))
+		const { activeId, activeChart, expandedKeys } = getState().chart
+		const data = updateBaseConfig(activeChart, value, activeId, expandedKeys)
+		
+		dispatch(createAction(T.CHART_SET_BASE_CONFIG)(data))
+		if (!data.activeId) {
+			dispatch(createAction(T.CHART_DEFAULT_CHART)())
+		}
 	}
 }
 
 // 修改主要配置值
-export const doImportantConfig = (value: any) => {
+export const doImportantConfig = ({ fields, value } : { fields: string, value: any }) => {
 	return (dispatch: Function, getState: Function) => {
-		const state = getState()
-		const { chartData, activeId } = state.chart
-		const chart = getActiveChart(chartData, activeId)
-		chart && updateImportantConfig(chart, value)
-
-		dispatch(createAction(T.CHART_SET_IMPORTANT_CONFIG)({
-			chartData: [...chartData],
-			activeChart: Object.assign({}, chart)
-		}))
+		const { activeChart } = getState().chart
+		let data = activeChart.option
+        const arr = fields.trim().split('-')
+        const lastFields = arr[arr.length - 1]
+        arr.slice(0, arr.length - 1).map((item: string) => {
+            data = item && item.length > 0 ? data[item] : data
+        })
+		// 浅拷贝一下
+		if (isArray(value)) {
+			value = [...value]
+		} else if (isObject(value)) {
+			value = {...value}
+		}
+		
+		data[lastFields] = value
+		activeChart.option = Object.assign({}, activeChart.option)
+		dispatch(createAction(T.CHART_SET_IMPORTANT_CONFIG)())
 	}
 }
 
-// 图层拖拽排序
+
+// 移动图层
 export const doMoveDispose = (value: any) => {
 	return (dispatch: Function, getState: Function) => {
-		const { startKey, endKey } = value
 		const { chartData } = getState().chart
-		let { targetParentChildren, targetIndex, startParentChildren, startIndex, direction } = getMoveStartEndParent(chartData, startKey, endKey);
+        const data = moveChart({...value, chartData})
+		
+		dispatch(createAction(T.CHART_DATA)(data))
+	}
+}
 
-		if (targetParentChildren) {
-			dispatch(doMoveChartLayer({
-				targetParentChildren,
-				targetIndex,
-				startParentChildren,
-				startIndex,
-				direction
-			}))
+// 拖拽移动图层
+export const doDropMoveAction = (value: any) => {
+	return (dispatch: Function) => {
+		dispatch(doMoveDispose(value))
+
+		// 保存行为
+		const action: ActionType = {
+			type: ActionEnumType.DRAG_MOVE_CHART,
+			currentActiveId: value.dragKey,
+			activeId: 0,
+			next: null,
+			last: null,
+			newvalue: value,
+			oldvalue: {}
 		}
+		doSaveAction(action)
 	}
 }
 
 // 上一层
-export const doUpperLayer = () => {
+export const doUpperLayer = (key: number, isKey?: boolean) => {
 	return (dispatch: Function, getState: Function) => {
-		const { chartData, activeId } = getState().chart
-		let { targetParentChildren, targetIndex, startParentChildren, startIndex, direction } = getUpLayerParent(chartData, activeId);
+		const { chartData } = getState().chart
 
-		if (targetParentChildren) {
-			dispatch(doMoveChartLayer({
-				targetParentChildren,
-				targetIndex,
-				startParentChildren,
-				startIndex,
-				direction
-			}))
-		}
+		loopGetLastData(chartData, key)
+		.then((chart: ChartType | null, lastChart: ChartType | null, data: ChartType[], index: number) => {
+			if (lastChart && chart && chart.chart_id !== lastChart.chart_id) {
+				data.splice(index, 0, chart)
+				dispatch(createAction(T.CHART_DATA)([...chartData]))
+
+				// 保存行为
+				!isKey && doSaveAction({
+					type: ActionEnumType.UP,
+					currentActiveId: key,
+					activeId: 0,
+					next: null,
+					last: null,
+					newvalue: {
+						dragKey: key,
+						dropKey: lastChart.chart_id
+					},
+					oldvalue: {}
+				})
+			}
+		})
 	}
 }
 
 // 下一层
-export const doNextLayer = () => {
+export const doNextLayer = (key: number, isKey?: boolean) => {
 	return (dispatch: Function, getState: Function) => {
-		const { chartData, activeId } = getState().chart
-		let { targetParentChildren, targetIndex, startParentChildren, startIndex, direction } = getNextLayerParent(chartData, activeId);
+		const { chartData } = getState().chart
 
-		if (targetParentChildren) {
-			dispatch(doMoveChartLayer({
-				targetParentChildren,
-				targetIndex,
-				startParentChildren,
-				startIndex,
-				direction
-			}))
+		loopGetNextData(chartData, key)
+		.then((chart: ChartType | null, nextChart: ChartType | null, data: ChartType[], index: number) => {
+			if (nextChart && chart && chart.chart_id !== nextChart.chart_id) {
+				data.splice(index + 1, 0, chart)
+				dispatch(createAction(T.CHART_DATA)([...chartData]))
+
+				// 保存行为
+				!isKey && doSaveAction({
+					type: ActionEnumType.DOWN,
+					currentActiveId: key,
+					activeId: 0,
+					next: null,
+					last: null,
+					newvalue: {
+						dragKey: key,
+						dropKey: nextChart.chart_id
+					},
+					oldvalue: {}
+				})
+			}
+		})
+	}
+}
+
+// 置顶
+export const doToTop = (key: number, isKey?: boolean) => {
+	return (dispatch: Function, getState: Function) => {
+		const { chartData } = getState().chart
+		const firstKey = chartData[0].chart_id
+		
+		loopGetLastAndNextData(chartData, key)
+		.then((chart: ChartType | null, data: ChartType[], index: number, lastChart: ChartType | null, nextChart: ChartType | null) => {
+			if (chart && firstKey !== chart.chart_id) {
+				const spliceChart = data.splice(index, 1)[0]
+				chartData.unshift(spliceChart)
+				dispatch(createAction(T.CHART_DATA)([...chartData]))
+
+				!isKey && doSaveAction({
+					type: ActionEnumType.TOP,
+					currentActiveId: key,
+					activeId: 0,
+					next: null,
+					last: null,
+					newvalue: {
+						dragKey: key,
+						dropKey: lastChart ? lastChart.chart_id : nextChart?.chart_id,
+						dropPosition: lastChart ? 1 : -1
+					},
+					oldvalue: {}
+				})
+			}
+		})
+	}
+}
+
+// 置底
+export const doToBottom = (key: number, isKey?: boolean) => {
+	return (dispatch: Function, getState: Function) => {
+		const { chartData } = getState().chart
+		const lastkey = chartData[chartData.length - 1].chart_id
+		
+		loopGetLastAndNextData(chartData, key)
+		.then((chart: ChartType | null, data: ChartType[], index: number, lastChart: ChartType | null, nextChart: ChartType | null) => {
+			if (chart && lastkey !== chart.chart_id) {
+				const spliceChart = data.splice(index, 1)[0]
+				chartData.push(spliceChart)
+				dispatch(createAction(T.CHART_DATA)([...chartData]))
+
+				!isKey && doSaveAction({
+					type: ActionEnumType.BOTTOM,
+					currentActiveId: key,
+					activeId: 0,
+					next: null,
+					last: null,
+					newvalue: {
+						dragKey: key,
+						dropKey: lastChart ? lastChart.chart_id : nextChart?.chart_id,
+						dropPosition: lastChart ? 1 : -1
+					},
+					oldvalue: {}
+				})
+			}
+		})
+	}
+}
+
+// 成为分组
+export const doBecomeGroup = (cids: number[]) => {
+	return (dispatch: Function, getState: Function) => {
+		const { activeId } = getState().chart
+		const group = defaultChart(true)
+		dispatch(doAddGroupNoEdit(group, cids))
+
+		// 保存行为
+		const action: ActionType = {
+			type: ActionEnumType.BECOME_GROUP,
+			currentActiveId: activeId,
+			activeId: group.chart_id,
+			next: null,
+			last: null,
+			newvalue: {
+				cids
+			},
+			oldvalue: {}
+		}
+		doSaveAction(action)
+	}
+}
+
+// 直接成为分组
+export const doAddGroupNoEdit = (group: ChartType, ids: number[]) => {
+	return (dispatch: Function, getState: Function) => {
+		const { chartData, expandedKeys } = getState().chart
+		const id = ids[0]
+
+		loopGetData(chartData, id)
+		.then((chart: ChartType | null, data: ChartType[], index: number) => {
+			if (chart) {
+				const list = getChartDataByIds(data, ids)
+				data.splice(index, 0, group)
+				group.children = list
+				dispatch(createAction(T.CHART_ADD_CHART)())
+
+				// 打开分组
+				const keyIndex = expandedKeys.indexOf(group.chart_id)
+				if (keyIndex === -1) {
+					dispatch(createAction(T.CHART_EXPANDED_KEYS)([...expandedKeys, group.chart_id]))
+				}
+			}
+		})
+	}
+}
+
+// 直接解散分组
+export const doDisbandGroupNoEdit = (gid: number, isKey?: boolean) => {
+	return (dispatch: Function, getState: Function) => {
+		const { chartData, expandedKeys } = getState().chart
+
+		loopGetData(chartData, gid)
+		.then((chart: ChartType | null, data: ChartType[], index: number) => {
+			if (chart) {
+				// 删除分组
+				const parent = data.splice(index, 1)[0]
+				data.splice(index, 0, ...(parent.children || []))
+				dispatch(createAction(T.CHART_ADD_CHART)())
+				const cids = parent.children?.map((item: ChartType) => {
+					return item.chart_id
+				})
+
+				// 删除打开分组id
+				const keyIndex = expandedKeys.indexOf(gid)
+				if (keyIndex !== -1) {
+					expandedKeys.splice(keyIndex, 1)
+				}
+				dispatch(createAction(T.CHART_EXPANDED_KEYS)([...expandedKeys]))
+
+				// 备份
+				backupsChart.push({...parent, children: []})
+				!isKey && doSaveAction({
+					type: ActionEnumType.DISBAND_GROUP,
+					currentActiveId: gid,
+					activeId: gid,
+					next: null,
+					last: null,
+					newvalue: {
+						cids
+					},
+					oldvalue: {}
+				})
+			}
+		})
+	}
+}
+
+// 直接添加图层
+export const doAddChartNoEdit = (chart: ChartType) => {
+	return (dispatch: Function, getState: Function) => {
+		let { chartData } = getState().chart
+		// chartData.unshift(chart)
+		chartData.push(chart)
+		dispatch(createAction(T.CHART_ADD_CHART)())
+	}
+}
+
+// 添加图层
+export const doAddChart = ({
+	cid,
+	xy = { x: 0, y: 0}
+} : {
+	cid: number,
+	xy?: any
+}) => {
+	return (dispatch: Function, getState: Function) => {
+		let { chartData, activeId } = getState().chart
+		const chart = getCreateChartByCid(cid, xy)
+
+		if (chart) {
+			chartData.push(chart)
+			dispatch(createAction(T.CHART_ADD_CHART)())
+			// 历史行为处理
+			const action: ActionType = {
+				type: ActionEnumType.ADD,
+				currentActiveId: activeId,
+				activeId: chart.chart_id,
+				next: null,
+				last: null,
+				newvalue: {},
+				oldvalue: {}
+			}
+			doSaveAction(action)
 		}
 	}
 }
 
-// 移动图层层级
-export const doMoveChartLayer = (data: any) => {
-
+// 根据数据源修改数据
+export const doChartOptionBySource = (chart: ChartType) => {
 	return (dispatch: Function, getState: Function) => {
-		const { chartData, openGroupIds } = getState().chart
-		let { targetParentChildren, targetIndex, startParentChildren, startIndex, direction } = data
-		let targetChart = targetParentChildren[targetIndex] as ChartType
-		let startChart = startParentChildren.splice(startIndex, 1)[0] as ChartType
+		let { chartData, activeId } = getState().chart
 
-		if (direction === 'down') {
-			if (targetParentChildren !== startParentChildren) {
-				targetIndex += 1
-			}
-		}
+		const source = chart.source
+		if (source) {
+			let {
+				default: defaultValue,
+				multi_source,
+				result_structure,
+				handle,
+				update_fields
+			} = source
+			handle = handle ? handle : (data: any) => (data)
+			defaultValue = handle(defaultValue)
 
-		// 分组
-		if (targetChart.is_group && openGroupIds.includes(targetChart.id)) {
-			// 不为分组子对象时添加
-			if (!startChart.father_ids.includes(targetChart.id)) {
-				targetParentChildren = targetChart.children
-				targetIndex = 0
-				startChart.father_ids = [...targetChart.father_ids, targetChart.id]
+			if (multi_source) {
+				result_structure?.forEach((item: any) => {
+					const itemHandle = item.handle ? item.handle : (data: any) => (data)
+					const arr = item.update_fields.split('-') || []
+					const lastFields = arr.splice(arr.length - 1, 1)[0]
+					let option = chart.option
+					arr.forEach((fields: string) => {
+						option = option[fields]
+					})
+					option[lastFields] = itemHandle(defaultValue)
+				})
 			} else {
-				startChart.father_ids = [...targetChart.father_ids]
+				const arr = update_fields.split('-') || []
+				const lastFields = arr.splice(arr.length - 1, 1)[0]
+				let option = chart.option
+				arr.forEach((fields: string) => {
+					option = option[fields]
+				})
+				
+				option[lastFields] = defaultValue
 			}
-		} else {
-			startChart.father_ids = [...targetChart.father_ids]
 		}
-
-		// 根据引用类型修改位置
-		targetParentChildren.splice(targetIndex, 0, startChart)
-		dispatch(createAction(T.CHART_MOVE_IDX)({ chartData: [...chartData] }))
+		chartData.push(chart)
+		dispatch(createAction(T.CHART_ADD_CHART)())
 	}
 }
 
-// 置顶或置底
-export const doTopOrBottom = (type: string) => {
-	return (dispatch: Function, getState: Function) => {
-		const { chartData, activeId } = getState().chart
-		const parentChildren = loopGetParent(chartData, activeId) as ChartType[];
-
-		let moveChart: ChartType | null = null
-		for (let i = 0; i < parentChildren.length; i++) {
-			const chart = parentChildren[i]
-			if (chart.id === activeId) {
-				moveChart = parentChildren.splice(i, 1)[0]
-				break
-			}
-		}
-		;(moveChart as ChartType).father_ids = [0]
-		type === 'top' ? chartData.unshift(moveChart) : chartData.push(moveChart);
-		dispatch(createAction(T.CHART_MOVE_IDX)({ chartData: [...chartData] }))
-	}
+// 拷贝保存图层
+export const doCopyChart = () => {
+    return (dispatch: Function, getState: Function) => {
+        const { activeChart } = getState().chart
+		const chart = deepClone(activeChart)
+        dispatch(createAction(T.CHART_COPY_KEY)(chart))
+    }
 }
 
 // 复制图层
 export const doChartCopy = () => {
 	return (dispatch: Function, getState: Function) => {
-		const { chartData, activeChart, activeId } = getState().chart
-		const parentChildren = loopGetParent(chartData, activeId) as ChartType[];
+		const { chartData, activeId } = getState().chart
 
-		for (let i = 0; i < parentChildren.length; i++) {
-			const chart = parentChildren[i]
-			if (chart.id === activeId) {
-				const copyChart = JSON.parse(JSON.stringify(activeChart))
-				copyChart.x = copyChart.x + 40
-				copyChart.y = copyChart.y + 40
-				copyChart.id = getNewChartId()
-				parentChildren.splice(i + 1, 0, copyChart)
-				break
-			}
-		}
+		loopGetData(chartData, activeId)
+		.then((chart: ChartType | null, data: ChartType[], index: number) => {
+			if (chart) {
+				const copychart = resetChartId(deepClone(chart))
+				data.splice(index + 1, 0, copychart)
+				dispatch(createAction(T.CHART_ADD_CHART)())
 
-		dispatch(createAction(T.CHART_ADD_CHART)({ chartData: [...chartData] }))
-	}
-}
-
-// 添加分组
-export const doAddGroup = () => {
-	return (dispatch: Function, getState: Function) => {
-		const { chartData, activeChart, activeId } = getState().chart
-		const parentChildren = loopGetParent(chartData, activeId) as ChartType[];
-		
-		for (let i = 0; i < parentChildren.length; i++) {
-			const chart = parentChildren[i]
-			if (chart.id === activeId) {
-				const group = defaultGroup(activeChart.father_ids)
-				parentChildren.splice(i, 0, group)
-				break
-			}
-		}
-
-		dispatch(createAction(T.CHART_ADD_CHART)({ chartData: [...chartData] }))
-	}
-}
-
-// 成为/取消分组
-export const doBecomeGroup = () => {
-	return (dispatch: Function, getState: Function) => {
-		const { chartData, activeChart, activeId, openGroupIds } = getState().chart
-		const parentChildren = loopGetParent(chartData, activeId) as ChartType[];
-		
-		for (let i = 0; i < parentChildren.length; i++) {
-			const chart = parentChildren[i]
-			if (chart.id === activeId) {
-				if (chart.is_group) { // 分组 -> 取消分组
-					const parent = parentChildren.splice(i, 1)[0]
-					// 重新设置父id
-					loopResetFatherIds(parent.children || [], parent.id)
-					parentChildren.splice(i, 0, ...(parent.children || []))
-				} else {  // 不是分组 -> 分组
-					const group = defaultGroup(activeChart.father_ids)
-					activeChart.father_ids = [...group.father_ids, group.id]
-					group.children?.push(parentChildren.splice(i, 1)[0])
-					parentChildren.splice(i, 0, group)
-					// 打开分组
-					openGroupIds.push(group.id)
-					dispatch(setGroupIds(openGroupIds))
+				// 历史行为处理
+				const action: ActionType = {
+					type: ActionEnumType.COPY,
+					currentActiveId: activeId,
+					activeId: copychart.chart_id,
+					next: null,
+					last: null,
+					newvalue: {
+						index: index
+					},
+					oldvalue: {}
 				}
-				break
+				doSaveAction(action)
 			}
-		}
-
-		dispatch(createAction(T.CHART_ADD_CHART)({chartData: [...chartData]}))
+		})
 	}
 }
 
-// 添加图层
-export const doAddChart = (chart: any) => {
-	return (dispatch: Function, getState: Function) => {
-		let { chartData } = getState().chart
+// 粘贴拷贝的图层
+export const doPasteChart = () => {
+    return (dispatch: Function, getState: Function) => {
+        const { chartData, copyChart, activeId } = getState().chart
 
-		// 拷贝一份图层
-		const newChart = JSON.parse(JSON.stringify(chart))
-		newChart.id = getNewChartId()
-		if (newChart.source) {
-			newChart.source = Object.assign({}, defaultSource(), newChart.source)
-			newChart.source.father_id = newChart.id
-		}
-		chartData.push(newChart)
+		loopGetData(chartData, copyChart.chart_id)
+		.then((chart: ChartType | null, data: ChartType[], index: number) => {
+			if (chart) {
+				const pasteChart = deepClone(chart)
+				pasteChart.x = copyChart.x + 40
+				pasteChart.y = copyChart.y + 40
+				pasteChart.chart_id = Date.now()
+				data.splice(index + 1, 0, pasteChart)
 
-		dispatch(createAction(T.CHART_ADD_CHART)({ chartData: [...chartData] }))
-		// dispatch(doAddHistoryAction({type: 'add', chart_id: newChart.id }))
-	}
+				dispatch(createAction(T.CHART_ADD_CHART)())
+				// 历史行为处理
+				const action: ActionType = {
+					type: ActionEnumType.PASTE,
+					currentActiveId: activeId,
+					activeId: pasteChart.chart_id,
+					next: null,
+					last: null,
+					newvalue: {
+						index: index
+					},
+					oldvalue: {}
+				}
+				doSaveAction(action)
+			}
+		})
+    }
 }
+
 // 恢复删除图层
 export const doRecoverChart = (value: any) => {
 	return (dispatch: Function) => {
@@ -286,111 +519,178 @@ export const doRecoverChart = (value: any) => {
 }
 
 // 彻底删除图层
-export const doDeleteChart = (value: any) => {
+export const doDeleteChart = (list: any, iskey?: boolean) => {
 	return (dispatch: Function, getState: Function) => {
 		const { chartData } = getState().chart
-		value.forEach((chart: ChartType) => {
-			const parentChildren = loopGetParent(chartData, chart.id) as ChartType[]
-			for (let i = 0; i < parentChildren.length; i++) {
-				if (parentChildren[i].id === chart.id) {
-					parentChildren.splice(i, 1)
-					break
+		
+		list.forEach((id: number) => {
+			loopGetData(chartData, id)
+			.then((chart: ChartType | null, data: ChartType[], index: number) => {
+				if (chart) {
+					iskey && backupsChart.push(data[index])
+					data.splice(index, 1)
 				}
-			}
+			})
 		})
+		
 		dispatch(createAction(T.CHART_DELETE_CHART)([...chartData]))
 	}
 }
 
-// 行为管理
-export const doChartActionManage = (type: any) => {
+// 设置全局看板样式
+export const doCanvasStyle = (value: any) => {
 	return (dispatch: Function, getState: Function) => {
-		const { activeChart, activeId } = getState().chart
-
-		if (!activeChart || !activeId) return
+		const { canvasChart } = getState().chart
+		const { type } = value
 
 		// 根据行为类型处理
 		switch (type) {
+			// 背景颜色
+			case ActionEnumType.BG_COLOR:
+				canvasChart.bg_color = value.bg_color
+				break
+			// 宽高
+			case ActionEnumType.WH:
+				canvasChart.width = value.width
+				canvasChart.height = value.height
+				break
+			case ActionEnumType.XY:
+				canvasChart.x = value.x
+				canvasChart.y = value.y
+				break
+			case ActionEnumType.OPACITY:
+				canvasChart.opacity = value.opacity
+				break
+			case ActionEnumType.REPEAT:
+				canvasChart.option.repeatType = value.repeatType
+				break
+			default:
+				break
+		}
+		dispatch(createAction(T.CHART_CANVAS_STYLE)({...canvasChart}))
+	}
+}
+
+// 行为管理
+export const doChartActionManage = (value: any) => {
+	return (dispatch: Function, getState: Function) => {
+		const { activeChart, activeId } = getState().chart
+		const { type } = value
+		let oldvalue = {}
+
+		// 根据行为类型处理
+		switch (type) {
+			// 添加图层
+			case ActionEnumType.ADD:
+				return dispatch(doAddChart(value))
 			// 上一层
-			case 'up':
-				dispatch(doUpperLayer())
-				break
+			case ActionEnumType.UP:
+				return dispatch(doUpperLayer(activeId))
 			// 下一层
-			case 'down':
-				dispatch(doNextLayer())
-				break
+			case ActionEnumType.DOWN:
+				return dispatch(doNextLayer(activeId))
 			// 置底、置顶
-			case 'top':
-			case 'bottom':
-				dispatch(doTopOrBottom(type))
-				dispatch(doTopOrBottom(type))
-				break
+			case ActionEnumType.TOP:
+				return dispatch(doToTop(activeId))
+			case ActionEnumType.BOTTOM:
+				return dispatch(doToBottom(activeId))
 			// 复制
-			case 'copy':
-				dispatch(doChartCopy())
+			case ActionEnumType.COPY:
+				return dispatch(doChartCopy())
+			// 粘贴
+			case ActionEnumType.PASTE:
+				return dispatch(doPasteChart())
+			// 成为分组
+			case ActionEnumType.BECOME_GROUP:
+				return dispatch(doBecomeGroup([activeId]))
+			// 解散分组
+			case ActionEnumType.DISBAND_GROUP:
+				return dispatch(doDisbandGroupNoEdit(activeId))
+			// 位置
+			case ActionEnumType.XY:
+				oldvalue = {
+					x: activeChart.x,
+					y: activeChart.y
+				}
+				dispatch(doBaseConfig(value))
 				break
-			// 添加分组
-			case 'add_group':
-				dispatch(doAddGroup())
+			// 图层名称
+			case ActionEnumType.CHART_NAME:
+				oldvalue = {
+					name: activeChart.chart_name
+				}
+				dispatch(doBaseConfig(value))
 				break
-			// 形成/取消分组
-			case 'into_group':
-				dispatch(doBecomeGroup())
+			// 背景颜色
+			case ActionEnumType.BG_COLOR:
+				oldvalue = {
+					bg_color: activeChart.bg_color
+				}
+				dispatch(doBaseConfig(value))
+				break
+			// 宽高
+			case ActionEnumType.WH:
+				oldvalue = {
+					width: activeChart.width,
+					height: activeChart.height
+				}
+				dispatch(doBaseConfig(value))
+				break
+			// 旋转
+			case ActionEnumType.ROTATE:
+				oldvalue = {
+					rotate: activeChart.rotate
+				}
+				dispatch(doBaseConfig(value))
 				break
 			// 删除
-			case 'del':
-				dispatch(doBaseConfig({ type, is_del: !activeChart.is_del, del_date: parseTime(new Date()) }))
-				// 隐藏行为管理
-				dispatch(doActionVisible(false))
+			case ActionEnumType.DEL:
+				value.is_del = !activeChart.is_del
+				oldvalue = {
+					is_del: activeChart.is_del
+				}
+				dispatch(doBaseConfig({
+					type,
+					is_del: !activeChart.is_del,
+					del_date: parseTime(new Date())
+				}))
 				break
 			// 显示
-			case 'show':
+			case ActionEnumType.SHOW:
+				oldvalue = {
+					is_hide: activeChart.is_hide
+				}
 				dispatch(doBaseConfig({ type, is_hide: !activeChart.is_hide }))
 				break
 			// 锁定
-			case 'lock':
+			case ActionEnumType.LOCK:
+				oldvalue = {
+					is_lock: activeChart.is_lock
+				}
 				dispatch(doBaseConfig({ type, is_lock: !activeChart.is_lock }))
 				break
-		}
-	}
-}
-
-// 添加历史行为
-export const doAddHistoryAction = (data: any) => {
-	return (dispatch: Function, getState: Function) => {
-		const { historyAction } = getState().chart
-		const { type, value, chart_id } = data
-
-		// 添加行为
-		historyAction.push({ type, chart_id, value})
-		dispatch(createAction(T.ACTION_MANAGE)({
-			historyAction,
-			actionIndex: historyAction.length - 1
-		}))
-	}
-}
-
-// 设置背景图层样式
-export const doCanvasStyle = (data: any) => {
-	return (dispatch: Function, getState: Function) => {
-		let { chart: { canvasStyle } } = getState()
-		
-		switch (data.type) {
-			case 'scale':
-				canvasStyle.scale = data.value
-				// canvasStyle.adaptive_scale = data.value
-				canvasStyle.x = 0
-				canvasStyle.y = 0
+			// 透明度
+			case ActionEnumType.OPACITY:
+				oldvalue = {
+					opacity: activeChart.opacity
+				}
+				dispatch(doBaseConfig(value))
 				break
 			default:
-				canvasStyle = data.value
 				break
 		}
 
-		dispatch(createAction(T.CHART_CANVAS_STYLE)(canvasStyle))
+		// 历史行为处理
+		const action: ActionType = {
+			type,
+			currentActiveId: activeId,
+			activeId: getState().chart.activeId,
+			next: null,
+			last: null,
+			newvalue: value,
+			oldvalue
+		}
+		doSaveAction(action)
 	}
 }
-// 行为组件位置
-export const doActionStyle = createAction(T.ACTION_STYLE)
-
 

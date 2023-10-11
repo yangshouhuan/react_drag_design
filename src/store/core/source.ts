@@ -1,7 +1,19 @@
 import { message } from "antd"
 import { RequestData } from "api"
-import { ChartType, DataSourceType, FieldType } from "types/chart"
-import { isArray, isNumber, isObject, isString, validateType, validateUrl } from 'utils/validate'
+import map from "chart-config-json/map"
+import { ChartType } from "types/chart"
+import { ChartSourceMapType, ChartSourceType } from "types/source"
+import { hasOwn, isArray, isNumber, isObject, isString, validateType, validateUrl } from 'utils/validate'
+
+// 获取source
+export const getSource = (source: any, index = 0) => {
+    if (isArray(source)) {
+        return source[index]
+    } else if (isObject(source)) {
+        return source
+    }
+    return null
+}
 
 /**
  * 
@@ -40,73 +52,60 @@ export function filterFun (filterString: string, data: any) : any {
 }
 
 // 设置映射字段
-export const setMapField = (chart: ChartType, data: any) => {
-    const { value, name } = data
-    const mapFields = chart.source?.map_field || []
-    mapFields.forEach((item: any) => {
-        if (item.old_name === name) {
-            item.new_name = value
+export const setMapField = (source: ChartSourceType, data: any) => {
+    const { value: map_fields, fields } = data
+    const list = source.result_structure || []
+    list.forEach((item: ChartSourceMapType) => {
+        if (item.fields === fields) {
+            item.map_fields = map_fields
         }
     })
 }
 
 // 字段验证
-export const fieldsVilidate = (fields: FieldType[], data: any): boolean => {
-    let status = true
+export const fieldsVilidate = (sourceMap: ChartSourceMapType[], data: any): boolean => {
+    let resultStatus = true
     // 字段验证
-    fields.forEach((item: FieldType) => {
-        const name = item.new_name.length > 0 ? item.new_name : item.old_name
-        if (validateType(item.type, data[name])) {
+    sourceMap.forEach((item: ChartSourceMapType) => {
+        const fields = isString(item.map_fields) && item.map_fields.length > 0 ? item.map_fields : item.fields
+        if (validateType(item.data_type, data[fields])) {
+            item.status = true
             // 替换值
-            if (name !== item.old_name) {
-                data[item.old_name] = data[name]
-                delete data[name]
+            if (fields !== item.fields) {
+                data[item.fields] = data[fields]
+                // delete data[fields]
             }
         } else {
-            item.status = false
-            status = false
+            item.status = resultStatus = false
         }
     })
-    return status
+    return resultStatus
 }
 
 // 类型验证
-export const dataVilidate = (source: DataSourceType, data: any): any => {
+export const dataVilidate = (source: ChartSourceType, data: any): any => {
     source.source_status = false
     const data_type = source.data_type.toLowerCase()
     // 数据验证
     if (validateType(data_type, data)) {
         let status = true
-        const map_field = source.map_field || []
-
-        // 初始化字段验证状态
-        map_field.forEach((item: FieldType) => {
-            item.status = true
-        })
+        const result_structure = source.result_structure || []
 
         if (data_type === 'array') {
             // 字段验证
             data.forEach((val: any) => {
-                if (!fieldsVilidate(map_field, val)) {
-                    status = false
-                }
+                status = fieldsVilidate(result_structure, val)
             })
         } else if (data_type === 'object') {
             // 字段验证
-            if (!fieldsVilidate(map_field, data)) {
-                status = false
-            }
+            status = fieldsVilidate(result_structure, data)
         } else if (data_type === 'numberarray') {
             data.forEach((val: any) => {
-                if (!isNumber(val)) {
-                    status = false
-                }
+                status = isNumber(val)
             })
         } else if (data_type === 'stringarray') {
             data.forEach((val: any) => {
-                if (!isString(val)) {
-                    status = false
-                }
+                status = isString(val)
             })
         }
         
@@ -117,8 +116,8 @@ export const dataVilidate = (source: DataSourceType, data: any): any => {
 }
 
 // 执行过滤器
-export const filterData = (source: DataSourceType, data: any): any => {
-    if (source.auth_filter && source.filter_fun && source.filter_fun.length > 0) {
+export const filterData = (source: ChartSourceType, data: any): any => {
+    if (source.auto_filter && source.filter_fun && source.filter_fun.length > 0) {
         const newData = filterFun(source.filter_fun, data)
         return dataVilidate(source, newData)
     } else {
@@ -126,28 +125,86 @@ export const filterData = (source: DataSourceType, data: any): any => {
     }
 }
 
-// 根据api获取数据
-export const getDataSource = (source: DataSourceType) => {
-    return new Promise((resolve, reject) => {
-        if (source.source_type !== 'static' && source.api_url && source.api_url.length > 0) {
-            if (validateUrl(source.api_url || '')) {
-                RequestData({ url: source.api_url, method: source.request_type })
-                    .then((res: any) => {
-                        if (res.status) {
-                            const data = res.data
-                            // 执行过滤器
-                            resolve(filterData(source, data))
-                        } else {
-                            message.error(res.message || '数据请求失败')
-                        }
-                    }).catch((error) => {
-                        message.error('数据请求失败')
-                        reject(error)
-                    })
-            } else {
-                message.error('接口验证失败')
-                reject('接口验证失败')
-            }
-        }
+// 根据字段路径分割，并且获取字段路径后的option
+const spliceFieldsGetOption = (option: any, fields_path: string) => {
+    const arr = fields_path.split('-') || []
+    const lastFields = arr.splice(arr.length - 1, 1)[0]
+    arr.forEach((fields: string) => {
+        option = option[fields]
     })
+    return [option, lastFields]
+}
+
+// 字段判断
+const fieldsVilidate1 = (data: any, mapItem: ChartSourceMapType) => {
+    if(validateType(mapItem.data_type, data)) {
+        mapItem.status = validateType(mapItem.data_type, data)
+    } else {
+        mapItem.status = false
+    }
+}
+
+const defaultHandler = (data: any, mapItem: ChartSourceMapType) => {
+    let {
+        fields,
+        map_fields,
+        require,
+        data_type,
+        content_type,
+        de_weight,
+        default: defaultValue,
+        update_fields,
+        update_type
+    } = mapItem
+    fields = isString(map_fields) && map_fields.length > 0 ? map_fields : fields
+    mapItem.status = true
+    
+    let newData = data.map((item: any) => {
+        if (hasOwn(item, fields)) {
+            const value = item[fields]
+            if (validateType(content_type || 'any', value)) {
+                mapItem.status = mapItem.status && true
+            } else {
+                mapItem.status = false
+            }
+            return value
+        }
+        if (require) {
+            mapItem.status = false
+        }
+        return mapItem.default
+    })
+    mapItem.status = validateType(mapItem.data_type, newData)
+
+    if (de_weight && isArray(newData)) {
+        return new Set(newData)
+    }
+
+    return newData
+}
+
+// 根据数据源规则设置chart.option值
+export const reflectSource = (chart: ChartType, source: ChartSourceType, resultValue?: any) => {
+    let {
+        default: defaultValue,
+        multi_source,
+        result_structure,
+        handle,
+        update_fields
+    } = source
+
+    if (multi_source) {
+        result_structure?.forEach((item: any) => {
+            const ownHandle = item.handle ? item.handle : defaultHandler
+            const [option, lastFields] = spliceFieldsGetOption(chart.option, item.update_fields)
+            option[lastFields] = ownHandle(defaultValue, item)
+        })
+    } else {
+        handle = handle ? handle : (data: any, item?: ChartSourceMapType) => (data)
+        defaultValue = resultValue ? handle(resultValue) : handle(defaultValue)
+        const [option, lastFields] = spliceFieldsGetOption(chart.option, update_fields)
+        option[lastFields] = defaultValue
+    }
+
+    return chart
 }

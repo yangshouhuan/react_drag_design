@@ -1,0 +1,41 @@
+.my-progress-bar {
+    height: 100%;
+
+    .content {
+        width: 100%;
+    }
+    .bg-progress {
+        position: relative;
+        height: 10px;
+        width: 70%;
+        border-radius: 4px;
+        background-color: #999999;
+    
+        .progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 80%;
+            background-color: aqua;
+            border-radius: 4px;
+        }
+    }
+    .value {
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: normal;
+        text-align: left;
+
+        span {
+            display: inline-block;
+            font-size: 18px;
+        }
+    }
+    .right-value {
+        margin-left: 10px;
+    }
+    .left-value {
+        margin-right: 10px;
+    }
+}

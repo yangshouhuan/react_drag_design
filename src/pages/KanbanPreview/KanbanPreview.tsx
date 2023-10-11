@@ -1,22 +1,22 @@
-import DataVComponent from "components/DataVComponent"
-import EchartsComponent from "components/EchartsComponent"
+import RenderDataV from "components/RenderDataV"
+import RenderEcharts from "components/RenderEcharts"
 import { Fragment, useEffect, useState } from "react"
 import { ChartType } from "types/chart"
 import { getPreviewData } from "useApi/auth"
 import './index.less'
+import { useParams } from "react-router-dom"
 
-const kanbanStyle = (canvasStyle: any) => {
+const kanbanStyle = (canvasChart: ChartType, scale: number) => {
 	
 	return {
-		transform: `scale(${canvasStyle.scale}) translate(0px, 0px)`,
-		width: canvasStyle.width,
-		height: canvasStyle.height,
-		backgroundColor: canvasStyle.config.backgroundColor,
-		backgroundImage: canvasStyle.config.backgroundImage
+		transform: `scale(${scale}) translate(0px, 0px)`,
+		width: canvasChart.width,
+		height: canvasChart.height,
+		backgroundColor: canvasChart.bg_color,
+		opacity: canvasChart.opacity
 	}
 }
-
-const getChartStyle = (chart: ChartType) => {
+const getMoveStyle = (chart: ChartType) => {
 	return {
 		width: chart.width,
 		height: chart.height,
@@ -24,75 +24,62 @@ const getChartStyle = (chart: ChartType) => {
 		top: chart.y
 	}
 }
+const getChartStyle = (chart: ChartType) => {
+	return {
+        position: 'absolute',
+        width: chart.width,
+        height: chart.height,
+        backgroundColor: chart.bg_color,
+		opacity: chart.opacity
+    }
+}
 
-const RenderChart = ({
-	chart
-}: {
-	chart: ChartType
-}) => {
+const RenderChart = ({ chart }: { chart: ChartType }) => {
 
-	if (chart.is_hide || chart.is_del) {
-		return <></>
-	}
+	if (chart.is_hide || chart.is_del)
+		<></>
 
 	if (chart.is_group) {
 		return (
 			<Fragment>
-				{chart.children?.map((chart: ChartType) => <RenderChart key={chart.id} chart={chart} />)}
+				{chart.children?.map((chart: ChartType) => <RenderChart key={chart.chart_id} chart={chart} />)}
 			</Fragment>
 		)
 	}
-
-	const chartStyle = {
-        position: 'absolute',
-        width: chart.width,
-        height: chart.height,
-        backgroundColor: chart.bg_color
-    }
+	
 	return (
-		<div className="chart-item" style={getChartStyle(chart)}>
-			{ chart.is_echarts ? <EchartsComponent chart={chart} chartStyle={chartStyle}  />
-				: <DataVComponent chart={chart} chartStyle={chartStyle} />
+		<div className="chart-item" style={getMoveStyle(chart)}>
+			{ chart.is_echart ? <RenderEcharts
+					chartElId={'eMain' + chart.chart_id}
+					chart={chart}
+					chartStyle={getChartStyle(chart)}
+				/>
+				: <RenderDataV
+					chartElId={'eMain' + chart.chart_id}
+					chart={chart}
+					chartStyle={getChartStyle(chart)}
+				/>
 			}
 		</div>
 	)
 }
 
-const Proview = () => {
-	// 画布背景样式
-	const [canvasStyle, setCanvasStyle] = useState({
-		scale: 1,
-		width: 1920,
-		height: 1080,
-		config: {
-			backgroundColor: 'rgb(14, 42, 66)',
-			backgroundImage: '',
-			fit: 0
-		}
-	})
-	const [chartData, setChartData] = useState([])
-
-	useEffect(() => {
-		const {data, kb_style} = getPreviewData()
-		setChartData(data)
-		setCanvasStyle(kb_style)
-
-		const screenWidth = document.documentElement.clientWidth
-		const scale = (screenWidth / kb_style.width).toFixed(6)
-		setCanvasStyle({...kb_style, scale: scale as unknown as number})
-		window.onresize = () => {
-			const screenWidth = document.documentElement.clientWidth
-			const scale = (screenWidth / kb_style.width).toFixed(6)
-			setCanvasStyle({...kb_style, scale: scale as unknown as number})
-		}
-	}, [])
+const Proview = ({
+	canvasChart,
+	chartData,
+	adaptive_scale,
+} : {
+	canvasChart: ChartType
+	chartData: ChartType[]
+	adaptive_scale: number
+}) => {
 
 	return (
 		<div className="preview-container">
-			<div className="kanban-preview-content" style={kanbanStyle(canvasStyle)}>
-				{chartData.map((chart: ChartType) => <RenderChart key={chart.id} chart={chart} />)}
+			<div className="kanban-preview-content" style={kanbanStyle(canvasChart, adaptive_scale)}>
+				{chartData.map((chart: ChartType) => <RenderChart key={chart.chart_id} chart={chart} />)}
 			</div>
-			<div className="kanban-bg" style={{backgroundColor: canvasStyle.config.backgroundColor}}></div>
+			<div className="kanban-bg" style={{backgroundColor: canvasChart.bg_color}}></div>
 		</div>
 	)
 }

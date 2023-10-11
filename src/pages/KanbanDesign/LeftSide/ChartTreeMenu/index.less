@@ -1,0 +1,34 @@
+.chart-tree-menu {
+    position: absolute;
+	// top: 72px;
+    top: 38px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #1C2026;
+	color: #ffffff;
+	overflow-y: scroll;
+    width: 100%;
+
+    .ant-tree-directory {
+        background-color: #1C2026;
+        color: white;
+    }
+    .ant-tree-draggable-icon {
+        display: none;
+    }
+    .ant-tree-treenode:hover:before {
+        background-color: #333333 !important;
+        transition: background-color 0.1s;
+    }
+    .ant-tree.ant-tree-directory .ant-tree-treenode-selected::before {
+        background-color: #1890ff !important;
+    }
+    .ant-tree-switcher-noop {
+        display: none;
+    }
+    .tree-menu-title {
+        display: inline-block;
+        width: 100px;
+    }
+}

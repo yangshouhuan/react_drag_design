@@ -2,9 +2,9 @@ import md5 from 'js-md5'
 import request from '../utils/request'
 
 export function login(data) {
-  data.Pwd = md5(data.Pwd)
+  data.pwd = md5(data.pwd)
   return request({
-    url: '/Login/Index',
+    url: '/auth/login',
     method: 'post',
     data
   })

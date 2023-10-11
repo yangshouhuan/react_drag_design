@@ -6,7 +6,7 @@ export const isFunction = (value: any) => {
     return typeof value === 'function'
 }
 
-export const isString = (value: any) => {
+export const isString = (value: any) : boolean => {
     return typeof value === 'string'
 }
 
@@ -17,37 +17,14 @@ export const isNumber = (value: any) => {
 export const isArray = Array.isArray
 
 const hasOwnProperty = Object.prototype.hasOwnProperty
-export const hasOwn = (value: object, key: string) => hasOwnProperty.call(value, key)
+export const hasOwn = (value: object, key: string) => {
+  return hasOwnProperty.call(value, key)
+}
 
 export const invokeArrayFns = (fns: Function[]) => {
     for (let i = 0; i < fns.length; i++) {
         fns[i]()
     }
-}
-
-// 深拷贝
-export function deepclone (obj: any) {
-    function copyList(arr: any) : any {
-        let result = []
-        for (let item of arr) {
-          result.push(deepclone(item))
-        }
-        return result
-      }
-
-      if (typeof obj === "object") {
-        if (Array.isArray(obj)) {
-          return copyList(obj)
-        } else {
-          let result: any = {}
-          for (let key in obj) {
-            result[key] = deepclone(obj[key])
-          }
-          return result
-        }
-      } else {
-        return obj
-      }
 }
 
 // 日期格式化
@@ -116,7 +93,7 @@ export function validateType (type: string, data: any) : boolean {
 }
 
 export function validateUrl (url: string) : boolean {
-    // const regExp = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\*\+,;=.]+$/)
-    // return regExp.test(url)
-    return true;
+    const regExp = new RegExp(/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\*\+,;=.]+$/)
+    return regExp.test(url)
+    // return true;
 }

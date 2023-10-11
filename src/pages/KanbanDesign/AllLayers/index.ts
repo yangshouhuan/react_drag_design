@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { doAddChart } from 'store/action/chart_base'
+import { doChartActionManage } from 'store/action/chart_base'
 import { handleHeaderVisible } from 'store/action/visible'
 
 import AllLayers from './AllLayers'
@@ -14,14 +14,13 @@ const layerStyle = (allVisible: boolean, myVisible: boolean) => {
 
 const mapStateToProps = (state: any) => {
 	return {
-		layerStyle: layerStyle(state.visible.all_layer_visible, state.visible.my_layer_visible),
+		layerStyle: layerStyle(state.visible.all_layer_visible, state.visible.my_layer_visible)
 	}
 }
 
 const mapDispatchToProps = (dispatch: Function) => {
 	return {
-		handleHeaderVisible: (type: string, values = false) => dispatch(handleHeaderVisible(type, values)),
-		doAddChart: (value: any) => dispatch(doAddChart(value)) 
+		doChartActionManage: (value: any) => dispatch(doChartActionManage(value)) 
 	}
 }
 

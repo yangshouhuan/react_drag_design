@@ -1,11 +1,16 @@
 const Global = {
-  // apiUrl: "https://localhost:44398",
-  // apiUrl: "http://localhost:3002",
-  apiUrl: "http://www.yshcz.com.cn:3033",
-  // wsUrl: 'wss:/www.yshcz.com.cn:3033/ws'
-  // wsUrl: 'wss://localhost:44398/ws',
-  // fileUrl: 'http://www.yshcz.com.cn:3034'
-  fileUrl: 'http://localhost:3033/assetss'
+  // 本地
+  // fileUrl: 'http://www.yshczaa.com.cn/assetss',
+  // apiUrl: "http://localhost:8089",
+  // 虚拟机
+  // fileUrl: 'http://192.168.0.104/assetss',
+  // apiUrl: "http://192.168.0.104:8089",
+  // ip4
+  // fileUrl: 'http://8.218.208.196/assetss',
+  // apiUrl: "http://8.218.208.196:8089",
+  // 域名
+  fileUrl: 'http://www.yshcz.com.cn/assetss',
+  apiUrl: "http://www.yshcz.com.cn:8089",
 }
 
 export default Global

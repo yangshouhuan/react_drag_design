@@ -5,12 +5,24 @@ import './index.less'
 const SketchExample = ({
     onChange,
     color,
-    style
+    style,
+    defaultValue
 } : {
     onChange: (color: any, e?: any) => void
-    color: any
+    color?: any
+    defaultValue?: any
     style?: any
 }) => {
+
+    const handleChange = (e: any) => {
+        if (e.source === 'rgb') {
+            const { r, g, b, a} = e.rgb
+            const rgba = `rgba(${r}, ${g}, ${b}, ${a})`
+            onChange(rgba, e)
+        } else {
+            onChange(e.hex, e)
+        }
+    }
 
     return (
         <div className='sketch-example' style={style}>
@@ -20,14 +32,14 @@ const SketchExample = ({
                     overlayClassName="my-overlay-class-name"
                     content={
                         <SketchPicker
-                            color={color}
-                            onChange={(e: any) => onChange(e.hex, e)}
+                            color={color ? color : defaultValue}
+                            onChange={(e: any) => handleChange(e)}
                             presetColors={[]}
                         />
                     }
                 >
                 <div className='sketch-swatch'>
-                    <div className='sketch-color' style={{backgroundColor: color}} />
+                    <div className='sketch-color' style={{backgroundColor: color ? color : defaultValue}} />
                 </div>
             </Popover>
         </div>

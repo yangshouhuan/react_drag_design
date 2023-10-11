@@ -1,75 +1,55 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import classnames from 'classnames'
-import datavOptions from 'chart-config/chart-options/datav/options'
-import echartOptions from 'chart-config/chart-options/echarts/options'
-import chartOptionList from 'chart-config/chart-options'
 import './index.less'
-
-import {
-	ALL_LAYER_VISIBLE
-} from 'store/constants'
-
-import {
-	LeftOutlined,
-	SearchOutlined
-} from '@ant-design/icons'
-import { AllChartType, BaseChartType } from 'types/chart'
-import { Input } from 'antd'
+import { getAssetsGroup, getAssetsListByGid } from 'api/assets-api'
+import { ActionEnumType, ChartType } from 'types/chart'
+import Global from 'api/globalConfigApi'
 
 const AllLayers = ({
 	layerStyle,
-	handleHeaderVisible,
-	doAddChart,
+	doChartActionManage
 } : {
-	handleHeaderVisible: Function
 	layerStyle: any
-	doAddChart: Function
+	doChartActionManage: Function
 }) => {
-	const [activeId, setActiveId] = useState('0-0')
-	const [activeList, setActiveList] = useState<BaseChartType[]>([])
-	const [searchShow, setSearchShow] = useState(false)
-	const [keyWord, setKeyWord] = useState('')
-	const InputRef = useRef<any>(null)
+	// 激活项
+	const [activeId, setActiveId] = useState(12)
+	// 图层分组
+	const [assetsGroup, setAssetsGroup] = useState([])
+	// 图层列表
+	const [assetsList, setAssetsList] = useState<ChartType[]>([])
 
+	// 获取分组
 	useEffect(() => {
-		if (chartOptionList.length !== 0) {
-			let list: BaseChartType[] = []
-			chartOptionList.forEach((item: AllChartType) => {
-				list.push(...item.children)
-			})
-			chartOptionList.unshift({
-				id: '0-0',
-				title: '全部',
-				children: list
-			})
-		}
-	}, [chartOptionList])
-
-	useEffect(() => {
-		if (InputRef.current) {
-			InputRef.current.focus()
-		}
-	}, [searchShow])
-
-	useEffect(() => {
-		setKeyWord('')
-		chartOptionList.forEach((item: AllChartType) => {
-			if (item.id === activeId) {
-				setActiveList(item.children)
-			}
+		getAssetsGroup()
+		.then((res: any) => {
+			setAssetsGroup(res.data)
+			setActiveId(12)
 		})
-	}, [chartOptionList, activeId])
+	}, [])
+	// 获取列表
+	useEffect(() => {
+		getAssetsListByGid(activeId)
+		.then((res: any) => {
+			setAssetsList(res.data)
+		})
+	}, [activeId])
 
-	// 拖拽添加结束
-	const onDragEnd = (e: any, chart: BaseChartType) => {
+	// 拖拽结束
+	const handleDragEnd = (e: any, cid: number) => {
 		e.persist()
         e.preventDefault()
 
 		const x = e.pageX - (layerStyle.left + 290)
 		const y = e.pageY - 70
 
-		if (x > 0 && y > 0) {
-			doAddChart(Object.assign({}, chart.is_echarts ? echartOptions() : datavOptions(), chart, {x, y}))
+		// 添加图层
+		if (x >= 0 && y >= 0) {
+			doChartActionManage({
+				cid,
+				xy: {x, y},
+				type: ActionEnumType.ADD
+			})
 		}
 	}
 	
@@ -83,60 +63,43 @@ const AllLayers = ({
             }}
 		>
 			<div className="flex-both header">
-				<span>全部图层</span>
-				<div className="flex-a">
-					{
-						searchShow ? <Input
-							size='small'
-							className='search-input'
-							ref={InputRef}
-							value={keyWord}
-							onBlur={() => setSearchShow(false)}
-							onChange={(e: any) => {
-								e.persist()
-								setKeyWord(e.target.value)
-							}}
-						/> : <span
-								className="icon-span"
-								title="搜索"
-								onClick={() => setSearchShow(true)}
-							><SearchOutlined />
-						</span>
-					}
-					<span
-						className="icon-span"
-						title="关闭"
-						onClick={() => handleHeaderVisible(ALL_LAYER_VISIBLE, false)}
-					><LeftOutlined /></span>
-				</div>
+				<span>全部组件</span>
 			</div>
 			{/* 分组 */}
 			<div className="custom-scroll left-layer-classify">
-				{chartOptionList.map((item: AllChartType) => (
+				{assetsGroup.map((item: any) => (
 					<div
-						title={item.title}
-						className={classnames({'classify-item': true, 'classify-active': activeId === item.id})}
-						key={item.id}
-						onClick={() => setActiveId(item.id)}
-					>{item.title}</div>
+						title={item.group_name}
+						className={classnames({'classify-item': true, 'classify-active': activeId === item.group_id})}
+						key={item.group_id}
+						onClick={() => setActiveId(item.group_id)}
+					>{item.group_name}</div>
 				))}
 			</div>
 			{/* 列表 */}
 			<div className="custom-scroll right-classify-layer">
 				<ul>
-					{activeList.map((chart: BaseChartType) => (
-						chart.name.includes(keyWord) ?
+					{assetsList.map((chart: ChartType) => (
 						<li
 							draggable
-							key={chart.id}
-							onClick={() => doAddChart(Object.assign({}, chart.is_echarts ? echartOptions() : datavOptions(), chart))}
-							onDragEnd={(e: any) => onDragEnd(e, chart)}
+							key={chart.chart_id}
+							onClick={() => doChartActionManage({ cid: chart.chart_id, type: ActionEnumType.ADD})}
+							onDragEnd={(e: any) => handleDragEnd(e, chart.chart_id)}
 						>
-							<div className="layer-title">{chart.name}</div>
+							<div className="layer-title">{chart.chart_name}</div>
 							<div className="flex-center layer-img">
-								<img draggable="false" src={require('assetss/images/histogram.jpg').default} alt="" />
+								{/* <img
+									draggable="false"
+									src={Global.fileUrl + '/echarts_images/' + chart.chart_img}
+									alt=""
+								/> */}
+								<img
+									draggable="false"
+									src={require('assetss/echarts_images/' + chart.chart_img).default}
+									alt=""
+								/>
 							</div>
-						</li> : <></>
+						</li>
 					))}
 				</ul>
 			</div>

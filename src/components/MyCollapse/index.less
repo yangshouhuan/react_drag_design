@@ -1,0 +1,56 @@
+.my-collapse {
+    .my-collapse-header {
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: all 0.3s;
+        padding: 10px 6px;
+        background-color: #1C2026;
+        color: #dbdbdb;
+        border-bottom: 1px solid #32373e;
+
+        .my-collapse-header-text {
+            font-size: 12px;
+        }
+        .my-collapse-switcn {
+            position: absolute;
+        }
+        .my-collapse-header-text {
+            display: inline-block;
+            position: relative;
+            left: 28px;
+        }
+
+        .ant-switch-small {
+            min-width: 22px;
+            height: 12px;
+            line-height: 12px;
+        }
+        .ant-switch-small .ant-switch-handle {
+            width: 10px;
+            height: 10px;
+            top: 1px;
+        }
+        .ant-switch-small.ant-switch-checked .ant-switch-handle {
+            left: calc(100% - 10px - 0px);
+        }
+    }
+    .my-collapse-content {
+        color: #dbdbdb;
+        background-color: #121212;
+        font-size: 12px;
+        // padding-top: 6px;
+        padding: 6px 0;
+
+        .my-collapse-content-box {
+            color: #dbdbdb;
+        }
+    }
+    
+    .my-collapse-content-box .my-collapse-header {
+        background-color: #121212;
+    }
+}

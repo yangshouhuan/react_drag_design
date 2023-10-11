@@ -1,0 +1,98 @@
+@line-dashed: 1px dashed rgba(0, 172, 255, 0.84);
+@line-solid: 1px solid rgba(0, 172, 255, 0.84);
+
+.design-AuxiliaryLine-container {
+	position: absolute;
+	z-index: 9;
+	left: 200px;
+	top: 46px;
+	transition: 0.2s all ease-in-out;
+
+	.show-auxiliary {
+		position: relative;
+		width: 20px;
+		height: 20px;
+		background-color: #0E1013;
+		border-right: 1px solid #666666;
+		border-bottom: 1px solid #666666;
+		color: #ffffff;
+		font-size: 12px;
+		cursor: pointer;
+		z-index: 29;
+
+		&:hover {
+			color: #1890ff;
+		}
+	}
+
+	.ruler-wrapper {
+		position: absolute;
+		top: 0;
+		height: 20px;
+		padding-left: 20px;
+		background-color: #0E1013;
+	}
+
+	// x轴
+	.cross-canvas {
+		left: 20px;
+	}
+
+	// y轴
+	.vertical-canvas {
+		transform-origin: 0 100% 0;
+		transform: rotate(90deg) translateX(0px);
+	}
+
+	/* 移动辅助线 */
+	.cross-dotted {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 21px;
+		width: 100vw;
+		z-index: 17;
+		cursor: ew-resize;
+	}
+
+	.vertical-dotted {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 17;
+		width: 21px;
+		transform-origin: 0 100% 0;
+		cursor: ns-resize;
+	}
+
+	.dotted-line,
+	.solid-line {
+		position: absolute;
+		z-index: 15;
+	}
+
+	.vertical-line {
+		height: 10px;
+		left: 0;
+		top: 0;
+		right: 0;
+		border-top: @line-dashed;
+		cursor: ns-resize;
+	}
+	.solid-line.vertical-line {
+		border-top: @line-solid;
+	}
+
+	.cross-line {
+		width: 10px;
+		top: 0;
+		bottom: 0;
+		border-left: @line-dashed;
+		cursor: ew-resize;
+	}
+	.solid-line.cross-line {
+		border-left: @line-solid;
+	}
+
+}

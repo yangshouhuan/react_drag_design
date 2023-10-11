@@ -1,4 +1,5 @@
 import { Input } from "antd"
+import { SizeType } from "antd/lib/config-provider/SizeContext"
 import { useEffect, useState } from "react"
 
 const MyMultiInput = ({
@@ -9,8 +10,8 @@ const MyMultiInput = ({
 } : {
     onBlur: (e: any) => void
     value: any
-    props?: any
-    size?: string
+    props?: Record<string, any>
+    size?: SizeType
 }) => {
     const [newValue, setNewValue] = useState(value)
 
@@ -23,6 +24,7 @@ const MyMultiInput = ({
             {...props}
             size={size || "small"}
             value={newValue}
+            defaultValue={props ? props.default : ''}
             onChange={(e: any) => {
                 e.persist()
                 setNewValue(e.target.value)      

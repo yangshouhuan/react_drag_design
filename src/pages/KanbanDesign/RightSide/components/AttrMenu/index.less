@@ -1,0 +1,36 @@
+.menu-config-cmpt {
+    width: 36px;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: #0f0f0f;
+
+    .left-group-list {
+        background-color: #0f0f0f;
+        width: 36px;
+
+        .group-item {
+            display: flex;
+
+            flex-direction: row;
+            align-items: center;
+            white-space: nowrap;
+            user-select: none;
+            cursor: pointer;
+            position: relative;
+            writing-mode: vertical-lr;
+            overflow: hidden;
+            font-size: 12px;
+            color: #dbdbdb;
+
+            width: 36px;
+            height: unset;
+            padding: 16px 0;
+        }
+    }
+
+    .group-item-active {
+        background-color: #3a3a3a;
+    }
+}

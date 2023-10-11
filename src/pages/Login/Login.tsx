@@ -17,10 +17,12 @@ const Login = ({
 
 	const onLogin = async (values: any) => {
 		setSprinning(true)
-		const value = await doLogin(values)
+		const res = await doLogin(values)
 		setSprinning(false)
-		if (value.status) {
+		if (res.status) {
 			navigate('/KanbanManage', { replace: true })
+		} else {
+			message.error(res.message)
 		}
 	}
 
@@ -30,8 +32,8 @@ const Login = ({
 		}
 		
 		if (formRef.current) {
-			formRef.current?.setFieldValue('Phone', '18888888888')
-			formRef.current?.setFieldValue('Pwd', '123456')
+			formRef.current?.setFieldValue('name', '18888888888')
+			formRef.current?.setFieldValue('pwd', '123456')
 		}
 
 		return () => setSprinning(false)
@@ -54,7 +56,7 @@ const Login = ({
 						autoComplete="off"
 					>
 						<Form.Item
-							name="Phone"
+							name="name"
 							rules={[{ required: true, message: '手机号格式有误!' }]}
 						>
 							{/* <Input placeholder="请输入手机号" size="large" prefix={<UserOutlined />} /> */}
@@ -63,7 +65,7 @@ const Login = ({
 
 						<Form.Item
 							style={{ marginTop: 20, marginBottom: 20 }}
-							name="Pwd"
+							name="pwd"
 							rules={[{ required: true, message: '密码格式有误!' }]}
 						>
 							{/* <Input.Password placeholder="请输入密码" size="large" prefix={<LockOutlined />} /> */}

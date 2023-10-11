@@ -1,9 +1,14 @@
 .desing-config-content {
+    width: 100%;
+    overflow-x: hidden;
+
     color: #ffffff;
     font-size: 12px;
 
     .general-content {
-        padding: 15px 20px;
+        // padding: 15px 20px;
+        padding: 10px 20px;
+        border-bottom: 1px solid #000000;
     }
     .base-item {
         font-size: 12px;
@@ -14,25 +19,54 @@
         .base-right {
             position: relative;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            width: 190px;
+            width: 100%;
             margin-left: 10px;
+            
+            .ant-input-number-group-wrapper {
+                margin-right: 10px;
+                width: 30%;
+            }
         }
         .base-label {
+            display: inline-block;
             width: 100px;
         }
     }
 
-    .ant-collapse > .ant-collapse-item > .ant-collapse-header,
-    .ant-collapse-content {
-        color: #ffffff;
+    .group-item-icon {
+        height: 16px;
+        width: 16px;
+        margin: 2px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        ont-size: 14px;
     }
-    .ant-collapse-header,
-    .ant-collapse-ghost > .ant-collapse-item > .ant-collapse-content {
-        border-bottom: 1px solid #2E343C;
+
+    .attr-config-content {
+        position: absolute;
+        display: flex;
+        margin-right: 5px;
+        width: 100%;
+        overflow-x: hidden;
+        overflow-y: hidden;
     }
-    .ant-collapse-ghost > .ant-collapse-item > .ant-collapse-content {
-        background-color: #121212;
+    .menu-config-content {
+        width: 285px;
+
+        position: relative;
+        left: 36px;
+        overflow-x: hidden;
+        min-height: calc(100vh - 300px);
+    }
+    .ant-select-multiple {
+        font-size: 12px;
+    }
+    .ant-input-number {
+        width: 100%;
+    }
+    .ant-input-number-group-addon {
+        width: 34px;
     }
 }

@@ -1,22 +1,22 @@
-import { connect } from 'react-redux'
-import { doChartActionManage, setKanBanId } from 'store/action/chart_base'
-import { doActionVisible } from 'store/action/visible'
 import Action from './Action'
+import { connect } from 'react-redux'
+import { doChartActionManage } from 'store/action/chart_base'
+import { doActionVisible } from 'store/action/visible'
+
 
 const mapDispatchToProps = (dispatch: Function) => {
     return {
-		onActionClick: (value: any) => dispatch(doChartActionManage(value)),
+		doChartActionManage: (value: any) => dispatch(doChartActionManage(value)),
         doActionVisible: (value: any) => dispatch(doActionVisible(value)),
     }
 }
 
-
 const mapStateToProps = (state: any) => {
 
     return {
-        chart: state.chart.actionChart,
         actionStyle: state.chart.actionStyle,
-        isShow: state.visible.action_visibld,
+        actionVisible: state.visible.action_visible,
+        activeChart: state.chart.activeChart,
         screen: state.chart.screen
     }
 }

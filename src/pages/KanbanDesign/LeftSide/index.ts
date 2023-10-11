@@ -7,14 +7,13 @@ import LeftSide from './LeftSide'
 const mapStateToProps = (state: any) => {
 	return {
 		all_layer_visible: state.visible.all_layer_visible,
-		my_layer_visible: state.visible.my_layer_visible,
-		activeChart: state.chart.activeChart
+		my_layer_visible: state.visible.my_layer_visible
 	}
 }
 const mapDispatchToProps = (dispatch: Function) => {
 	return {
 		handleHeaderVisible: (type: string, values = false) => dispatch(handleHeaderVisible(type, values)),
-		doChartActionManage: (type: string) => dispatch(doChartActionManage(type))
+		doChartActionManage: (value: any) => dispatch(doChartActionManage(value))
 	}
 }
 

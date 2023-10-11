@@ -1,19 +1,19 @@
 import './index.less'
 
-import AuxiliaryLine from './components/AuxiliaryLine'
 import { ChartType } from 'types/chart'
 import RecursiveCreateChart from './components/RecursiveCreateChart'
 
 // 看板样式
-const kanbanStyle = (canvasStyle: any) => {
+const kanbanStyle = (chart: ChartType, scale: number) => {
 	return {
-		transform: `scale(${canvasStyle.scale}) translate(0px, 0px)`,
-		width: canvasStyle.width,
-		height: canvasStyle.height,
-		left: canvasStyle.x + 40,
-		top: canvasStyle.y + 40,
-		backgroundColor: canvasStyle.config.backgroundColor,
-		backgroundImage: canvasStyle.config.backgroundImage
+		transform: `scale(${scale}) translate(0px, 0px)`,
+		width: chart.width,
+		height: chart.height,
+		left: chart.x + 40,
+		top: chart.y + 40,
+		backgroundColor: chart.bg_color,
+		backgroundImage: chart.bg_color,
+		opacity: chart.opacity
 	}
 }
 
@@ -21,24 +21,24 @@ const Design = ({
 	designLeft,  // 左边距离
 	chartData,
 	activeId,
-	changeActiveId,
+	changeActiveById,
 	handleBaseConfig,
-	activeChart,
-	canvasStyle,
 	doActionVisible,
-	doActionStyle
+	doActionStyle,
+	scale,
+	canvasChart
 } : {
 	designLeft: number
 	chartData: ChartType[]
 	activeId: number | null
-	changeActiveId: Function
+	changeActiveById: Function
 	handleBaseConfig: Function
-	activeChart: ChartType
-	canvasStyle: any,
     doActionVisible: Function
     doActionStyle: Function
+	scale: number,
+	canvasChart: ChartType
 }) => {
-	
+
 	return (
 		<div
 			className='design-container'
@@ -46,18 +46,17 @@ const Design = ({
                 e.persist()
                 e.preventDefault()
             }}
+			onClick={() => changeActiveById(0)}
 		>
 			<div className="design-content" style={{left: designLeft}}>
-				{/* 辅助线 */}
-				<AuxiliaryLine canvasStyle={canvasStyle} />
 				{/* 图层面板 */}
-				<div className="kanban-layer-content" style={kanbanStyle(canvasStyle)}>
-					{chartData?.map((chart: ChartType) => (
+				<div className="kanban-layer-content" style={kanbanStyle(canvasChart, scale)}>
+					{chartData.map((chart: ChartType) => (
 						<RecursiveCreateChart
-							key={chart.id}
+							key={chart.chart_id}
 							chart={chart}
 							activeId={activeId}
-							onSetActiveId={(id: number) => changeActiveId(id)}
+							onSetActiveId={(cid: number) => changeActiveById(cid)}
 							onBaseConfig={handleBaseConfig}
 							onDragStart={() => doActionVisible(false)}
 							onRightKeyClick={(x: number, y: number) => {
@@ -67,7 +66,6 @@ const Design = ({
 						/>
 					))}
 				</div>
-				<div className='design-bg' onClick={() => changeActiveId(null)}></div>
 			</div>
 		</div>
 	)

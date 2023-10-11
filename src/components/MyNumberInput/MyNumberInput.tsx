@@ -1,16 +1,19 @@
 import { InputNumber } from "antd"
+import { SizeType } from "antd/lib/config-provider/SizeContext"
 import { useEffect, useState } from "react"
 
 const MyNumberInput = ({
     onBlur,
     value,
     props,
-    size
+    size,
+    style
 } : {
     onBlur: (e: any) => void
     value: any
-    props?: any
-    size?: string
+    props?: Record<string, any>
+    size?: SizeType
+    style?: any
 }) => {
     const [newValue, setNewValue] = useState(value)
 
@@ -21,10 +24,12 @@ const MyNumberInput = ({
     return (
         <InputNumber
             {...props}
+            defaultValue={props ? props.default : ''}
             size={size || "small"}
             value={newValue}
             onBlur={() => onBlur(newValue)}
-            onChange={(num: number) => setNewValue(num)}
+            style={style}
+            onChange={(num: number | null) => setNewValue(num)}
         />
     )
 }

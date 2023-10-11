@@ -1,83 +1,54 @@
 import { SyncOutlined } from "@ant-design/icons"
-import { Button, Checkbox, Input, InputNumber, Table, Timeline } from "antd"
+import { Button, Checkbox, InputNumber, Table, Timeline } from "antd"
 import MyCodemirror from "components/MyCodemirror"
 import MyModalCodemirror from "components/MyModalCodemirror"
-import { memo, useEffect, useState } from "react"
-import { DataSourceType, FieldType } from 'types/chart'
+import { memo, useState } from "react"
 import './index.less'
+import { ChartSourceMapType, ChartSourceType } from "types/source"
+import MyInput from "components/MyInput"
 
 // 获取封装后的columns
 const getColumns = (onChange: Function) => ([
     {
         title: '字段',
-        dataIndex: 'old_name',
+        dataIndex: 'fields',
         width: 60,
         ellipsis: true
     },
     {
         title: '映射',
-        dataIndex: 'new_name',
+        dataIndex: 'map_fields',
         width: 90,
         render: (value: string, record: any) => {
-            return <MyInput value={value} record={record} onChange={onChange} />
+            return (
+                <div className="flex-a config-map">
+                    <MyInput value={value} onBlur={(e: any) => onChange(e, record)} />
+                </div>
+            )
         }
     },
     {
         title: '状态',
         dataIndex: 'status',
         width: 80,
-        render: (val: boolean) => {
+        render: (val: boolean, item: any) => {
             return <div className="flex-a config-status">
                 <span className="status-span" style={{ backgroundColor: val ? '#1980ff' : '#cc9e1d' }}></span>
-                {val ? '配置完成' : '配置失败'}
+                {item.require ? '必须' : '可选'}
             </div>
         }
     }
 ])
-// 自定义输入框
-const MyInput = ({
-    onChange,
-    value,
-    record
-} : {
-    onChange: Function
-    value: string
-    record: any
-}) => {
-    const [newValue, setNewValue] = useState(value)
-
-    useEffect(() => {
-        setNewValue(value)
-    }, [onChange])
-
-    const handleChange = (e: any) => {
-        e.persist()
-        setNewValue(e.target.value)
-    }
-
-    return (
-        <div className="flex-a config-map">
-            <Input
-                size="small"
-                defaultValue={value}
-                value={newValue}
-                className="config-map-input"
-                onChange={handleChange}
-                onBlur={(e: any) => onChange(e, record)}
-            />
-        </div>
-    )
-}
 
 const BaseDataSource = ({
     setVisible,
     source,
-    filterCode,
+    dataResult,
     doSourceType
 }: {
     setVisible: Function
-    source: DataSourceType
-    filterCode: string
+    source: ChartSourceType
+    dataResult: string
     doSourceType: Function
 }) => {
     const [filterVisible, setFilterVisible] = useState(false)
@@ -86,8 +57,8 @@ const BaseDataSource = ({
     const onFieldInputChange = (e: any, record: any) => {
         e.persist()
         const value = e.target.value
-        const name = record.old_name 
-        doSourceType({data: {value, name}, type: 'map_field'})
+        const fields = record.fields
+        doSourceType({data: {value, fields}, type: 'update_fields'})
     }
 
     return (
@@ -95,21 +66,22 @@ const BaseDataSource = ({
             <div className="flex-both source-config-header">
                 <div>数据接口</div>
                 <div className="flex-a config-status">
-                    <span className="status-span" style={{ backgroundColor: source.field_status ? '#1980ff' : '#cc9e1d' }}></span>
-                    {source.field_status ? '配置完成' : '配置失败'}
+                    <span className="status-span" style={{ backgroundColor: source.fields_status ? '#1980ff' : '#cc9e1d' }}></span>
+                    {source.fields_status ? '配置完成' : '配置失败'}
                 </div>
             </div>
             {/* 映射字段 */}
-            {source.map_field ? <div className="source-fields-table">
+            {source.result_structure && source.result_structure.length > 0 ? <div className="source-fields-table">
                 <Table
                     size="small"
                     rowClassName="row-class-name"
                     columns={getColumns(onFieldInputChange)}
-                    dataSource={source.map_field?.map((item: FieldType, index: number) => ({
+                    dataSource={source.result_structure?.map((item: ChartSourceMapType, index: number) => ({
                         key: index.toString(),
-                        old_name: item.old_name,
-                        new_name: item.new_name,
-                        status: item.status
+                        fields: item.fields,
+                        map_fields: item.map_fields,
+                        status: item.status,
+                        require: item.require
                     }))}
                     pagination={false}
                 />
@@ -153,9 +125,9 @@ const BaseDataSource = ({
                             <div title="开启过滤器">
                                 <Checkbox
                                     className="font-color-white"
-                                    defaultChecked={source.auth_filter}
-                                    checked={source.auth_filter}
-                                    onChange={(e: any) => doSourceType({data: e.target.checked, type: 'auth_filter'})}
+                                    defaultChecked={source.auto_filter}
+                                    checked={source.auto_filter}
+                                    onChange={(e: any) => doSourceType({data: e.target.checked, type: 'auto_filter'})}
                                 >数据过滤器</Checkbox>
                             </div>
                             <Button size="small" type="primary" ghost onClick={() => setFilterVisible(true)}>配置过滤器</Button>
@@ -170,9 +142,9 @@ const BaseDataSource = ({
                 </Timeline>
                 <div className="use-my-codemirror">
                     <MyCodemirror
-                        title="刷新"
+                        title="数据响应结果"
                         readOnly={true}
-                        codeValue={filterCode}
+                        codeValue={dataResult}
                     />
                 </div>
             </div>

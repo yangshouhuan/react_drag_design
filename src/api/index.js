@@ -9,7 +9,7 @@ export function RequestGet(url, params = {}) {
   return new Promise((resolve, rejects) => {
     setTimeout(() => {
       resolve({
-        status: 0,
+        code: 0,
         message: '暂无权限'
       })
     }, 300)
@@ -25,7 +25,7 @@ export function RequestPost(url, data) {
   return new Promise((resolve, rejects) => {
     setTimeout(() => {
       resolve({
-        status: 0,
+        code: 0,
         message: '暂无权限'
       })
     }, 300)
@@ -42,7 +42,7 @@ export function RequestDel (url, data) {
   return new Promise((resolve, rejects) => {
     setTimeout(() => {
       resolve({
-        status: 0,
+        code: 0,
         message: '暂无权限'
       })
     }, 300)
@@ -57,7 +57,7 @@ export function RequestData (options) {
   return new Promise((resolve, rejects) => {
     setTimeout(() => {
       resolve({
-        status: 0,
+        code: 0,
         message: '暂无权限'
       })
     }, 300)

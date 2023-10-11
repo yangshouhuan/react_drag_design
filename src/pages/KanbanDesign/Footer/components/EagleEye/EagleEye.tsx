@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChartType } from 'types/chart'
+import { ActionEnumType, ChartType } from 'types/chart'
 import ChartItem from '../ChartItem'
 import './index.less'
 
 // 鹰眼固定宽高
 const eyeW = 210
 const eyeH = 125
+let timer: any = null
 
 const eagleEyeStyle = (visible: boolean) => {
 	return {
@@ -19,18 +20,21 @@ const EagleEye = ({
 	eyeVisible,
 	chartData,
 	activeId,
-	canvasStyle,
+	chart,
+	scale,
+	adaptive_scale,
 	doCanvasStyle
 }: {
 	eyeVisible: boolean
 	chartData: ChartType[]
 	activeId: number
-	canvasStyle: any
+	chart: ChartType
+	scale: number
+	adaptive_scale: number
 	doCanvasStyle: Function
 }) => {
-	const {width: cW, height: cH, scale: cScale, adaptive_scale} = canvasStyle
 	// 旧的缩放值
-	const oldRef = useRef(cScale)
+	const oldRef = useRef(scale)
 	// 小视野是否显示
 	const [viewShow, setViewShow] = useState({
 		leaveFlag: true,
@@ -54,31 +58,31 @@ const EagleEye = ({
 		// 面板宽高改变，修改内容元素宽高
 		// 计算鹰眼、面板宽高比
 		let ratio1 = eyeH / eyeW,
-			ratio2 = cH / cW
+			ratio2 = chart.height / chart.width
 
 		// 计算鹰眼缩放 使用比值较小的一边作为参考，保证面板全部显示
-		let scale = (eyeW / cW) * 0.9
+		let newscale = (eyeW / chart.width) * 0.9
 		if (ratio1 < ratio2) {
-			scale = (eyeH / cH) * 0.9
+			newscale = (eyeH / chart.height) * 0.9
 		}
 
 		// 计算小面板宽高
 		setMinCanvas({
-			width: cW * scale,
-			height: cH * scale,
-			scale: scale
+			width: chart.width * newscale,
+			height: chart.height * newscale,
+			scale: newscale
 		})
 		
 		// 缩放改变，修改小视野宽高
-		if (cScale !== oldRef.current) {
-			oldRef.current = cScale
+		if (scale !== oldRef.current) {
+			oldRef.current = scale
 			let width = 0
 			let height = 0
 			// 是否溢出可视范围
-			if (cScale >= Number(adaptive_scale)) {  // 是
+			if (scale >= Number(adaptive_scale)) {  // 是
 				// 重新计算宽高
-				width = minCanvas.width * (adaptive_scale / cScale)
-				height = minCanvas.height * (adaptive_scale / cScale)
+				width = minCanvas.width * (adaptive_scale / scale)
+				height = minCanvas.height * (adaptive_scale / scale)
 			} else {  // 否
 				// 占满小面板
 				width = minCanvas.width
@@ -91,15 +95,15 @@ const EagleEye = ({
 				height
 			})
 		}
-	}, [canvasStyle])
+	}, [chart, scale, adaptive_scale, minCanvas.width, minCanvas.height])
 
 	const onMouseDown = (e: any) => {
 
-		// 自适应情况下，不允许拖拽
-		if (cScale === adaptive_scale) return
+		// 自适应或小于看板大小时，不允许修改
+		if (scale <= adaptive_scale) return
 
 		e.persist()
-		const target = e.target //获取目标元素
+		const target = e.target
 		const tx = e.clientX - target.offsetLeft
 		const ty = e.clientY - target.offsetTop
 		
@@ -133,15 +137,19 @@ const EagleEye = ({
 				top: top
 			})
 
-			// 计算视图面板偏移量
-			doCanvasStyle({
-				type: 'canvas',
-				value: {
-					...canvasStyle,
-					x: -(left / minCanvas.width) * cW,
-					y: -(top / minCanvas.height) * cH
-				}
-			})
+			// 隔100毫秒才设置看板位置
+			if (!timer) {
+				timer = setTimeout(() => {
+
+					// 计算视图面板偏移量
+					doCanvasStyle({
+						type: ActionEnumType.XY,
+						x: -(left / minCanvas.width) * chart.width,
+						y: -(top / minCanvas.height) * chart.height
+					})
+					timer = null
+				}, 100)
+			}
 		}
 
 		// 鼠标抬起，取消监听
@@ -167,7 +175,7 @@ const EagleEye = ({
 					<div className="backdrop-canvas" style={{ width: minCanvas.width, height: minCanvas.height }}>
 						{chartData.map((chart: ChartType) => (
 							<ChartItem
-								key={chart.id}
+								key={chart.chart_id}
 								chart={chart}
 								activeId={activeId}
 								scale={minCanvas.scale}

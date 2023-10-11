@@ -1,6 +1,5 @@
 import { Modal } from "antd"
 import MyCodemirror from "components/MyCodemirror";
-import { useEffect } from "react";
 import './index.less'
 
 const MyModalCodemirror = ({

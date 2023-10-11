@@ -1,32 +1,57 @@
 .kanban-manage-container {
-	.ant-menu-inline>.ant-menu-item {
-		height: 46px !important;
-		line-height: 46px;
-		font-size: 15px;
+	height: 100vh;
+	background-color: #1C2026;
+	border-left: 1px solid #000000;
+	overflow: hidden;
+	z-index: 10;
+	padding-top: 20px;
+
+	.ant-tabs-nav-list {
+		width: 100%;
+		padding: 6px 50px;
+		color: white;
+
+		.ant-tabs-tab {
+			margin-right: 60px;
+		}
+	}
+}
+
+.source-fields-table {
+
+	.ant-table-thead>tr>th,
+	.row-class-name {
+		background-color: #1C2026;
+		color: #bcc9d4;
 	}
 
-	.kanban-manage-header {
-		position: fixed;
-		top: 0;
-		right: 0;
-		left: 210px;
-		height: 57px;
-		padding: 0 20px;
-		background-color: #1C2026;
-		border-bottom: 1px solid black;
-		color: #cccccc;
-		overflow: hidden;
-		z-index: 999;
+	.ant-table-content>table {
+		border-top: 1px solid #666666 !important;
+	}
 
-		.icon-span {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			cursor: pointer;
-			font-size: 20px;
-		}
-		.icon-span:hover {
-			color: #1890ff;
-		}
+	.ant-table-tbody {
+		background-color: #303943;
+	}
+
+	.ant-table-thead>tr>th,
+	.ant-table-tbody>tr>td {
+		border-bottom: 1px solid #666666;
+		border-right: 1px solid #666666;
+		font-size: 13px;
+	}
+
+	.ant-table-container table>tbody>tr td:first-child,
+	.ant-table-container table>thead>tr:first-child th:first-child {
+		border-left: 1px solid #666666;
+	}
+
+	.ant-table-row-selected>td,
+	.ant-table-tbody>tr:hover>td {
+		background-color: #212e3e !important;
+	}
+
+	::-webkit-scrollbar,
+	.ant-table-cell-scrollbar {
+		display: none;
 	}
 }

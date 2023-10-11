@@ -1,20 +1,21 @@
 import { RequestPost, RequestGet, RequestDel } from 'api'
+import request from 'utils/request'
 
 
 // 删除看板
-export const KB_Del_List = (uuid: string) => {
-	return RequestDel('/KBManage/KB_Del_List?uuid=' + uuid)
+export const delKbList = (uuid: string) => {
+	return RequestDel('/KBManage/delKbList?uuid=' + uuid)
 }
 
 // 复制看板
-export const KB_Copy = (uuid: string) => {
-	return RequestPost('/KBManage/KB_Copy?uuId=' + uuid)
+export const copyKb = (uuid: string) => {
+	return RequestPost('/KBManage/copy?uuId=' + uuid)
 }
 
 
 // 创建看板
-export const KB_Create_List = (kId: number, values: any) => {
-	return RequestPost('/KBManage/KB_Create_List', {
+export const createKbList = (kId: number, values: any) => {
+	return RequestPost('/KBManage/createKbList', {
 		GroupId: kId,
 		Remark: '',
 		...values
@@ -22,28 +23,23 @@ export const KB_Create_List = (kId: number, values: any) => {
 }
 
 // 修改看板名称
-export const KB_Edit_Name = (id: string, value: string) => {
-	return RequestPost('/KBManage/KB_Edit_Name?uuId=' + id + '&name=' + value)
+export const updateKbName = (id: string, value: string) => {
+	return RequestPost('/KBManage/updatename?uuId=' + id + '&name=' + value)
 }
 
 // 获取看板列表
-export const get_KB_List = (kId: number) => {
-	return new Promise((resolve, rejects) => {
-		setTimeout(() => {
-			resolve({
-				status: 1,
-				data: [
-					{uuId: '1c9416ea-ad31-48c2-8c7c-76deadd95a67', name: '看板1'},
-					{uuId: '2c9416ea-ad31-48c2-8c7c-76deadd95a67', name: '看板2'}
-				]
-			})
-		})
+export const getKbList = (uid: number) => {
+	// return RequestGet('/manage/list', { uid })
+    return request({
+		url: '/manage/list',
+		method: 'get',
+		params: { uid }
 	})
 }
 
 // leftside
 // 获取分组列表
-export const get_KB_Group = (uid: number) => {
+export const getKbGroup = (uid: number) => {
     return new Promise((resolve, rejects) => {
         setTimeout(() => {
             resolve({
@@ -58,7 +54,7 @@ export const get_KB_Group = (uid: number) => {
 }
 
 // 增删改查项目
-export const KB_Edit_Group = (params: any) => RequestPost('/KBManage/KB_Edit_Group', params)
-export const KB_Create_Group = (params: any) => RequestPost('/KBManage/KB_Create_Group', params)
-export const KB_Del_Group = (id: number) => RequestDel('/KBManage/KB_Del_Group?id=' + id)
-export const KB_Get_Detail = (kid: number) => RequestGet('/KBManage/KB_Get_Detail?id=' + kid)
+export const updateKbGroup = (params: any) => RequestPost('/KBManage/updateKbGroup', params)
+export const createKbGroup = (params: any) => RequestPost('/KBManage/createKbGroup', params)
+export const delKbGroup = (id: number) => RequestDel('/KBManage/delKbGroup?id=' + id)
+export const getKbDetail = (kid: number) => RequestGet('/KBManage/getKbDetail?id=' + kid)

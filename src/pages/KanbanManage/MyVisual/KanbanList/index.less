@@ -1,0 +1,147 @@
+.kanban-list-container {
+	position: relative;
+	width: calc(100% - 210px);
+
+	.kanban-content {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		top: 0;
+		overflow-y: scroll;
+	
+		.add-kanban {
+			width: 240px;
+			height: 175px;
+			margin: 10px;
+			background-color: #D7D7D7;
+			text-align: center;
+			line-height: 175px;
+			font-size: 60px;
+			font-weight: bold;
+			color: #222222;
+			cursor: pointer;
+		}
+	
+		.kanban-item {
+			width: 240px;
+			height: 175px;
+			margin: 10px;
+		}
+	
+		.edit-kanban {
+			display: flex;
+			position: relative;
+			width: 100%;
+			height: 145px;
+			cursor: pointer;
+			justify-content: center;
+			align-items: center;
+			background-color: #D7D7D7;
+	
+			.edit-kanban-icon {
+				display: inline-block;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				margin-left: -15px;
+				margin-top: -15px;
+				font-size: 30px;
+				color: #cccccc;
+				z-index: 2;
+				transition: all 0.3s ease;
+				opacity: 0;
+			}
+			img {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+			}
+			.mask {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background-color: #333333;
+				opacity: 0;
+				z-index: 1;
+				transition: all 0.3s ease;
+			}
+	
+			&:hover .edit-kanban-icon {
+				opacity: 1;
+			}
+			&:hover .mask {
+				opacity: 0.3;
+			}
+		}
+	
+		.kanban-item-note {
+			height: 30px;
+			padding-top: 8px;
+		}
+	
+		.kanban-item-note {
+			.edit-kanban-name {
+				width: 130px;
+				font-size: 14px;
+	
+				span {
+					display: inline-block;
+					width: 100%;
+					color: #ffffff;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					overflow: hidden;
+				}
+	
+				input {
+					width: 100%;
+					border-radius: 2px;
+					padding: 2px;
+					box-sizing: border-box;
+					color: #000000;
+					outline: none;
+					border: 1px solid #cccccc;
+					height: 22px;
+				}
+			}
+		}
+	
+		.edit-name {
+			width: 130px;
+		}
+	
+		.el-input__inner {
+			height: 25px;
+		}
+	
+		.note .note-icon {
+			margin-left: 10px;
+			font-size: 16px;
+			color: #ffffff;
+			cursor: pointer;
+		}
+	
+		.note .note-icon:hover {
+			color: #46a6ff;
+		}
+	}
+
+	
+}
+
+.kanban-content::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+.kanban-content::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.kanban-content::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 1);
+}

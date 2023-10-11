@@ -1,221 +1,315 @@
-import chart from "store/reducers/chart"
-import { ChartType } from "types/chart"
-import { isArray, isObject } from "utils/validate"
+import { ActionEnumType, ChartType } from "types/chart"
+import { deepClone } from "utils/shared"
+import config_group from 'chart-config-json'
+import { defaultChart } from "chart-config-json/shared/default_data"
+import { isString } from "utils/validate"
 
-interface FindStartEndParentType {
-    targetParentChildren: ChartType[] | null
-    targetIndex: number
-    startParentChildren: ChartType[] | null
-    startIndex: number
-    direction: string
-}
-
-let targetParentChildren: ChartType[] | null = null,
-    targetIndex = 0,
-    targetIdx = 0,
-    startParentChildren: ChartType[] | null = null,
-    startIndex = 0,
-    startIdx = 0,
-    chartIdx = 0,
-    direction = 'up';
-
-/**
- * 查找图层父类
- * @param chartData 
- * @param key 
- * @returns 
- */
-export const loopGetParent = (chartData: ChartType[], key: number): ChartType[] | null => {
-    let parentChildren: ChartType[] | null = null
-
-    const len = chartData.length
-    for (let i = 0; i < len; i++) {
-        const chart = chartData[i]
-        if (chart.id === key) {
-            parentChildren = chartData
-        }
-        if (!parentChildren && chart.is_group) {
-            parentChildren = loopGetParent(chart.children || [], key)
-        }
-        if (parentChildren) break
+// 根据fields获取option
+export const getOptionByFidles = (data: any, fields: any) => {
+    if (!isString(fields) || fields.length === 0) {
+        return data
     }
-
-    return parentChildren
-}
-
-const loopGetStartAndEndParent = (chartData: ChartType[], startKey: number, endKey: number) : FindStartEndParentType => {
-
-    for (let i = 0; i < chartData.length; i++) {
-        chartIdx++
-        const chart = chartData[i]
-        if (chart.id === startKey) {
-            startIdx = chartIdx
-            startIndex = i
-            startParentChildren = chartData
-        } else if (chart.id === endKey) {
-            targetIdx = chartIdx
-            targetParentChildren = chartData
-            targetIndex = i
-        }
-        if ((!targetParentChildren || !startParentChildren) && chart.is_group) {
-            loopGetStartAndEndParent(chart.children || [], startKey, endKey)
-        }
-        if (targetParentChildren && startParentChildren) break
-    }
-
-    return {
-        targetParentChildren,
-        targetIndex,
-        startParentChildren,
-        startIndex,
-        direction
-    }
-}
-// 拖拽排序时获取父类
-export const getMoveStartEndParent = (chartData: ChartType[], startKey: number, endKey: number) : FindStartEndParentType => {
-    targetParentChildren = null
-    startParentChildren = null
-    direction = 'up'
-    targetIndex = targetIdx = startIndex = startIdx = chartIdx = 0
-
-    const data = loopGetStartAndEndParent(chartData, startKey, endKey)
-    if (startIdx < targetIdx) {
-        data.direction = 'down'
-    }
-
+    const arr = fields.trim().split('-')
+    arr.map((item: any) => {
+        data = (isString(item) && item.length > 0) ? data[item] : data
+    })
     return data
 }
 
-const loopGetUpLayerParent = (chartData: ChartType[], key: number) : FindStartEndParentType => {
-    for (let i = 0; i < chartData.length; i++) {
-        const chart = chartData[i]
-        if (chart.id === key) {
-            startParentChildren = chartData
-            startIndex = i
-        } else {
-            targetParentChildren = chartData
-            targetIndex = i
-        }
-        if (!startParentChildren && chart.is_group) {
-            loopGetUpLayerParent(chart.children as ChartType[], key)
-        }
-        if (startParentChildren) break
+// 计算缩放
+export const calculateScale = (sw: number, sh: number, width: number, height: number): number => {
+	let scale = 1
 
-        targetParentChildren = chartData
-        targetIndex = i
+	// 用宽高比小的一方计算, 保证面板全部显示
+	if (sw - 605 > (sh * (width / height)) - 200) {
+		scale = Number(((sh - 200) / height).toFixed(6))
+	} else {
+		scale = Number(((sw - 605) / width).toFixed(6))
+	}
+
+	return scale < 0.2 ? 0.2 : scale
+}
+
+export const resetChartId = (chart: ChartType, index = 1) : ChartType => {
+
+    chart.x = chart.x + 40
+    chart.y = chart.y + 40
+    chart.chart_id = Date.now() + index
+
+    chart.children?.map((item: ChartType) => {
+        index++
+        return resetChartId(item, index)
+    })
+
+    return chart
+}
+
+/**
+ * 获取激活项图层
+ * @param data 
+ * @param cid 
+ * @returns 
+ */
+export const getActiveChart = (data: ChartType[], cid: number) : any => {
+    let chart: ChartType | null = null
+    let cids: number[] = []
+
+    const loop = (data: ChartType[], cid: number, ids: number[]) => {
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i]
+            if (item.chart_id === cid) {
+                chart = item
+                cids = ids
+                break
+            }
+            loop(item.children || [], cid, [...ids, item.chart_id])
+            if (chart) break
+        }
     }
+    loop(data, cid, [])
+
+    return { chart, cids }
+}
+
+/**
+ * 获取当前 chart和parent
+ * @param data 
+ * @param key 
+ * @returns 
+ */
+export const loopGetData = (data: ChartType[], key: number) => {
+    let chart: any = null  // 当前 chart
+    let currentdata: any = []  
+    let index = 0
+
+    const loop = (data: ChartType[], key: number) => {
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i]
+            if (item.chart_id === key) {
+                chart = item
+                currentdata = data
+                index = i
+                break
+            }
+
+            !chart && loop(item.children || [], key)
+
+            if (chart) break
+        }
+    }
+    loop(data, key)
 
     return {
-        targetParentChildren,
-        targetIndex,
-        startParentChildren,
-        startIndex,
-        direction: 'up'
+        then: (cb: Function) => cb(chart, currentdata, index)
     }
 }
-// 获取上一层时父类
-export const getUpLayerParent = (chartData: ChartType[], key: number) : FindStartEndParentType => {
-    targetParentChildren = null
-    startParentChildren= null
-    targetIndex = startIndex = 0
-    direction = 'up'
 
-    return loopGetUpLayerParent(chartData, key)
-}
+/**
+ * 获取上一个 chart 和parent
+ * @param data 
+ * @param key 
+ * @returns 
+ */
+export const loopGetLastData = (data: ChartType[], key: number) => {
+    let chart: any = null  // 当前 chart
+    let lastChart: any = null  // 上一个chart
+    let lastdata: any = []  
+    let index = 0
 
-const loopGetNextLayerParent = (chartData: ChartType[], key: number) : FindStartEndParentType => {
-    for (let i = 0; i < chartData.length; i++) {
-        const chart = chartData[i]
-        if (chart.id === key) {
-            startParentChildren = chartData
-            startIndex = i
-            continue
+    const loop = (data: ChartType[], key: number) => {
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i]
+            if (item.chart_id === key) {
+                chart = data.splice(i, 1)[0]
+                i--
+                break
+            }
+            if (!chart) {
+                lastdata = data
+                index = i
+                lastChart = item
+            }
+
+            !chart && loop(item.children || [], key)
+
+            if (chart) break
         }
-        if (startParentChildren) {
-            targetParentChildren = chartData
-            targetIndex = i
-        }
-        if (!targetParentChildren && chart.is_group) {
-            loopGetNextLayerParent(chart.children as ChartType[], key)
-        }
-        if (targetParentChildren) break
     }
+    loop(data, key)
 
     return {
-        targetParentChildren,
-        targetIndex,
-        startParentChildren,
-        startIndex,
-        direction: 'down'
+        then: (cb: Function) => cb(chart, lastChart, lastdata, index)
     }
 }
-// 循环获取下一层时父类
-export const getNextLayerParent = (chartData: ChartType[], key: number) : FindStartEndParentType => {
-    targetParentChildren = null
-    startParentChildren = null
-    targetIndex = startIndex = 0
-    direction = 'down'
 
-    return loopGetNextLayerParent(chartData, key)
+
+/**
+ * 获取下一个 chart 和parent
+ * @param data 
+ * @param key 
+ * @returns 
+ */
+export const loopGetNextData = (data: ChartType[], key: number) => {
+    let chart: any = null  // 当前 chart
+    let nextChart: any = null  // 下一个chart
+    let nextdata: any = []  
+    let index = 0
+
+    const loop = (data: ChartType[], key: number) => {
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i]
+            if (item.chart_id === key) {
+                chart = data.splice(i, 1)[0]
+                i--
+                continue
+            }
+            if (chart) {
+                nextChart = item
+                nextdata = data
+                index = i
+                break
+            }
+
+            !nextChart && loop(item.children || [], key)
+
+            if (nextChart) break
+        }
+    }
+    loop(data, key)
+
+    return {
+        then: (cb: Function) => cb(chart, nextChart, nextdata, index)
+    }
 }
 
+/**
+ * 上一层和下一层的chart
+ * @param data 
+ * @param key 
+ * @returns 
+ */
+export const loopGetLastAndNextData = (data: ChartType[], key: number) => {
+    let currentdata: ChartType[] = data
+    let index = 0
+    let chart: any = null  // 当前 chart
+    let lastChart: any = null  // 上一个chart
+    let nextChart: any = null  // 下一个chart
 
-// 修改基本配置
-export const updateBaseConfig = (chart: ChartType, value: Record<string, any>, activeId: number | null, openGroupIds: string[]): Record<string, any> => {
+    const loop = (data: ChartType[], key: number) => {
+        for (let i = 0; i < data.length; i++) {
+            const item = data[i]
+            if (item.chart_id === key) {
+                chart = item
+                currentdata = data
+                index = i
+                continue
+            }
+            if (chart) {
+                nextChart = item
+            } else if (!chart) {
+                lastChart = item
+            }
+            if (!chart || !nextChart) {
+                // 再加一个group是否打开判断
+                loop(item.children || [], key)
+            } else {
+                break
+            }
+        }
+    }
+    loop(data, key)
+
+    return {
+        then: (cb: Function) => cb(chart, currentdata, index, lastChart, nextChart)
+    }
+}
+
+/**
+ * 获取所有匹配id的chart，并且从原对象中删除
+ * @param data 
+ * @param ids 
+ * @returns 
+ */
+export const getChartDataByIds = (data: ChartType[], ids: number[]) => {
+    let list: ChartType[] = []
+
+    const loop = (data: ChartType[], ids: number[]) => {
+        for (let i = 0; i < data.length; i++) {
+            const chart = data[i]
+            if (ids.includes(chart.chart_id)) {
+                list.push(data.splice(i, 1)[0])
+                i--
+            }
+            loop(chart.children || [], ids)
+
+            if (list.length === ids.length) break
+        }
+    }
+    loop(data, ids)
+
+    return list
+}
+
+/**
+ * 修改基本配置
+ * @param chart 
+ * @param value 
+ * @param activeId 
+ * @param selectKeys 
+ * @returns 
+ */
+export const updateBaseConfig = (chart: ChartType, value: Record<string, any>, activeId: number | null, selectKeys: string[]): Record<string, any> => {
 
     switch (value.type) {
-        case 'name':
-            chart.name = value.name
+        case ActionEnumType.CHART_NAME:
+            chart.chart_name = value.name
             break
-        case 'wh':
+        case ActionEnumType.WH:
             chart.width = parseInt(value.width)
             chart.height = parseInt(value.height)
             break
-        case 'xy':
+        case ActionEnumType.XY:
             chart.x = parseInt(value.x)
             chart.y = parseInt(value.y)
             break
-        case 'opacity':
+        case ActionEnumType.OPACITY:
             chart.opacity = value.opacity
             break
-        case 'rotate':
-            chart.transform = parseInt(value.rotate)
+        case ActionEnumType.ROTATE:
+            chart.rotate = parseInt(value.rotate)
             break
-        case 'name':
-            chart.name = value.name
-            break
-        case 'show':
+        case ActionEnumType.SHOW:
             chart.is_hide = value.is_hide
             if (chart.is_hide) {
-                const showIndex = openGroupIds.indexOf((activeId as number).toString())
+                const showIndex = selectKeys.indexOf((activeId as number).toString())
                 if (showIndex !== -1) {
-                    openGroupIds.splice(showIndex, 1)
+                    selectKeys.splice(showIndex, 1)
                 }
-                activeId = null
+                activeId = 0
             }
             break
-        case 'del':
+        case ActionEnumType.DEL:
             chart.is_del = value.is_del
             if (value.is_del) {
                 // 删除时间
-                chart.del_date = value.del_date
-                const delIndex = openGroupIds.indexOf((activeId as number).toString())
+                chart.del_time = value.del_date
+                const delIndex = selectKeys.indexOf((activeId as number).toString())
                 if (delIndex !== -1) {
-                    openGroupIds.splice(delIndex, 1)
+                    selectKeys.splice(delIndex, 1)
                 }
-                activeId = null
+                activeId = 0
             }
             break
-        case 'bg_color':
+        case ActionEnumType.BG_COLOR:
             chart.bg_color = value.bg_color
             break
-        case 'up':
-        case 'down':
+        case ActionEnumType.UP:
+        case ActionEnumType.DOWN:
             break
-        case 'top':
-        case 'bottom':
+        case ActionEnumType.TOP:
+        case ActionEnumType.BOTTOM:
             break
-        case 'lock':
+        case ActionEnumType.LOCK:
             chart.is_lock = value.is_lock
             break
         default:
@@ -223,62 +317,104 @@ export const updateBaseConfig = (chart: ChartType, value: Record<string, any>, a
     }
 
     return {
-        openGroupIds,
+        selectKeys,
         activeId,
-        activeChart: activeId ? Object.assign({}, chart) : null
+        activeChart: chart
     }
-}
-
-// 修改主要配置
-export const updateImportantConfig = (chart: ChartType, data: any) => {
-    const { fields, value } = data
-    const types = fields.split('-')
-    const len = types.length - 1
-
-    // 循环获取父项
-    let parent = chart.config
-    for (let i = 0; i < len; i++) {
-        parent = parent[types[i]]
-    }
-    if (parent) {
-        if (isArray(value)) {
-            parent[types[len]] = [...value]
-        } else if (isObject(value)) {
-            parent[types[len]] = { ...value }
-        } else {
-            parent[types[len]] = value
-        }
-    }
-
-    chart.config = Object.assign({}, chart.config)
 }
 
 /**
- * 激活时打开当前项的父类
- * @param openIds
- * @param ids 
+ * 创建一个图层
+ * @param param0 
  * @returns 
  */
-export const resetsOpenIds = (openIds: any, ids: number[]) => {
-    ids.forEach((v: number, i: number) => {
-        if (!openIds.includes(v) && v !== 0) {
-            openIds.push(v)
-        }
-    })
-    return openIds
+export const getCreateChartByCid = (cid: number, xy = { x: 0, y: 0}) => {
+	let chart: ChartType | null = null
+	for (let i = 0; i < config_group.length; i++) {
+		const list = config_group[i].list || []
+		for (let j = 0; j < list.length; j++) {
+			const item = list[j] as ChartType
+			if (item.chart_id === cid) {
+				chart = deepClone(Object.assign(defaultChart(), item)) as ChartType
+                chart.x = xy.x
+                chart.y = xy.y
+                chart.chart_id = new Date().getTime()
+				break
+			}
+		}
+		if (chart) break
+	}
+
+	return chart
 }
 
 /**
- * 
- * @param chartData 循环重置父类id
- * @param id 
+ * 拖拽移动图层
+ * @param param
+ * @returns 
  */
-export const loopResetFatherIds = (chartData: ChartType[], id: number) => {
-    chartData.forEach((chart: ChartType) => {
-        const index = chart.father_ids.indexOf(id)
-		chart.father_ids.splice(index, 1)
-        if (chart.is_group) {
-            loopResetFatherIds(chart.children || [], id)
-        }
-    })
+export const moveChart = ({
+	dropKey,
+	dragKey,
+	dropPosition = 1,  // 1 向下添加, -1向上添加
+    dropToGap = true,
+    children = [],
+    expanded = true,
+	chartData
+} : {
+	dropKey: number | string
+	dragKey: number | string
+	dropPosition?: number
+    dropToGap?: boolean
+    children?: any
+    expanded?: any
+	chartData: ChartType[]
+}) : ChartType[] => {
+
+	const loop = (
+		data: any,
+		key: React.Key,
+		callback: (node: any, i: number, data: any) => void,
+	) => {
+		for (let i = 0; i < data.length; i++) {
+			if (data[i].chart_id === key) {
+				return callback(data[i], i, data);
+			}
+			if (data[i].children) {
+				loop(data[i].children!, key, callback);
+			}
+		}
+	};
+
+	let dragObj: any;
+	loop(chartData, dragKey, (item, index, arr) => {
+		arr.splice(index, 1);
+		dragObj = item;
+	});
+
+	if (!dropToGap) {
+		loop(chartData, dropKey, (item) => {
+			item.children = item.children || [];
+			item.children.unshift(dragObj);
+		});
+	} else if (children.length > 0 && expanded && dropPosition === 1) {
+		loop(chartData, dropKey, (item) => {
+			item.children = item.children || [];
+			item.children.unshift(dragObj);
+		});
+	} else {
+		let ar: any = [];
+		let i: number;
+		loop(chartData, dropKey, (_item, index, arr) => {
+			ar = arr;
+			i = index;
+		});
+		if (dropPosition === -1) {
+			ar.splice(i!, 0, dragObj!);
+		} else {
+			ar.splice(i! + 1, 0, dragObj!);
+		}
+	}
+
+	return [...chartData]
 }

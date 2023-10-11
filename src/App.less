@@ -30,6 +30,10 @@ ul {
 @active: #1890ff;
 @theme_color: #1C2026;
 
+.ant-input-number-handler-wrap {
+  display: none;
+}
+
 .custom-scroll {
   position: absolute;
   top: 0;
@@ -38,6 +42,7 @@ ul {
   bottom: 0;
   color: #ffffff;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .custom-scroll::-webkit-scrollbar {
@@ -56,9 +61,22 @@ ul {
   box-shadow: inset 0 0 6px #2E343C;
 }
 
+.w-h-100-pc {
+  width: 100%;
+  height: 100%;
+}
+
 .w-1200 {
   width: 1200px;
   margin: 0 auto;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.m-b-10 {
+  margin-bottom: 10px;
 }
 
 .text-center {
@@ -155,4 +173,8 @@ ul {
 
 .active {
   color: #1890ff !important;
+}
+
+.ft-c-w {
+  color: #ffffff;
 }

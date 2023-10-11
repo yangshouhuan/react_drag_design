@@ -7,67 +7,81 @@ import {
     EyeOutlined,
     LockOutlined,
     VerticalAlignBottomOutlined,
-    VerticalAlignTopOutlined
+    VerticalAlignTopOutlined,
+    EyeInvisibleOutlined,
+    UnlockOutlined,
+    FolderOutlined
 } from "@ant-design/icons"
 import './index.less'
 import ReactDOM from 'react-dom'
-import { useEffect, useMemo, useState } from "react"
-import { ChartType } from "types/chart"
+import { useEffect, useState } from "react"
+import { ActionEnumType, ChartType } from "types/chart"
 
 const action = [
     {
         text: '置顶',
         icon: VerticalAlignTopOutlined,
-        action: 'top'
+        action: ActionEnumType.TOP
     },
     {
         text: '置底',
         icon: VerticalAlignBottomOutlined,
-        action: 'bottom'
+        action: ActionEnumType.BOTTOM
     },
     {
         text: '上移',
         icon: ArrowUpOutlined,
-        action: 'up'
+        action: ActionEnumType.UP
     },
     {
         text: '下移',
         icon: ArrowDownOutlined,
-        action: 'down'
+        action: ActionEnumType.DOWN
     },
     {
         text: '复制',
         icon: CopyOutlined,
-        action: 'copy'
+        action: ActionEnumType.COPY
     },
     {
         text: '删除',
         icon: DeleteOutlined,
-        action: 'del'
+        action: ActionEnumType.DEL
     }
 ]
 
 const ActionComponent = ({
-    isShow,
-    chart,
-    onActionClick,
+    actionVisible,
+    activeChart,
+	doChartActionManage,
 	actionStyle,
 	doActionVisible,
-	screen
+	screen,
 }: {
-    isShow: boolean
-    chart: ChartType | null
-    onActionClick: (type: string) => void
+    actionVisible: boolean
+    activeChart: ChartType | null
+	doChartActionManage: Function
 	actionStyle: any
 	doActionVisible: Function
 	screen: any
 }) => {
-    
+    const [leftAndTop, setLetAndTop] = useState({left: 0, top: 0})
 
+     // 行为组件坐标
+    useEffect(() => {
+        const between = screen.sh - actionStyle.y
+
+        setLetAndTop({
+            left: actionStyle.x,
+            top: between > 352 ? actionStyle.y : actionStyle.y - 352
+        })
+    }, [actionStyle, screen])
+
+    // 行为组件显示时，监听全局点击事件
     useEffect(() => {
         const click = () => doActionVisible(false)
         
-        if (isShow) {
+        if (actionVisible) {
             window.addEventListener('click', click)
             window.addEventListener('contextmenu', click)
         } else {
@@ -79,52 +93,32 @@ const ActionComponent = ({
             window.removeEventListener('click', click)
             window.removeEventListener('contextmenu', click)
         }
-    }, [isShow])
-
-    // 行为组件坐标
-	const leftAndTop = useMemo(() => {
-		const between = screen.sh - actionStyle.y
-
-		if (between < 390) {
-			return {
-				x: actionStyle.x,
-				y: actionStyle.y - 390
-			}
-		}
-
-		return {
-			x: actionStyle.x,
-			y: actionStyle.y
-		}
-	}, [actionStyle])
+    }, [actionVisible])
 
     return ReactDOM.createPortal(
-        <div className="chart-manage-action" style={{ display: isShow ? 'block' : 'none', left: leftAndTop.x, top: leftAndTop.y }}>
-            <p title="添加分组" onClick={() => onActionClick('add_group')}>
-                <span className="icon-span"><FolderOpenOutlined /></span>添加分组
-            </p>
-            {chart && !chart.is_group ? <p title="成为分组" onClick={() => onActionClick('into_group')}>
-                <span className="icon-span"><FolderOpenOutlined /></span>成为分组
+        <div className="chart-manage-action" style={{ display: actionVisible ? 'block' : 'none', left: leftAndTop.left, top: leftAndTop.top }}>
+            {activeChart && !activeChart.is_group ? <p title="成为分组" onClick={() => doChartActionManage({type: ActionEnumType.BECOME_GROUP})}>
+                <span className="icon-span"><FolderOpenOutlined /></span>成组
             </p> :
-                <p title="取消分组" onClick={() => onActionClick('into_group')}>
-                    <span className="icon-span"><FolderOpenOutlined /></span>取消分组
+                <p title="取消分组" onClick={() => doChartActionManage({type: ActionEnumType.DISBAND_GROUP})}>
+                    <span className="icon-span"><FolderOutlined /></span>解组
                 </p>}
             {action.map((item: any) => (
-                <p key={item.action} title={item.text} onClick={() => onActionClick(item.action)}>
+                <p key={item.action} title={item.text} onClick={() => doChartActionManage({ type: item.action })}>
                     <span className="icon-span"><item.icon /></span>{item.text}
                 </p>
             ))}
-            {chart && chart.is_hide ? <p title="显示" onClick={() => onActionClick('show')}>
+            {activeChart && activeChart.is_hide ? <p title="显示" onClick={() => doChartActionManage({ type: ActionEnumType.SHOW })}>
                 <span className="icon-span"><EyeOutlined /></span>显示
             </p> :
-                <p title="隐藏" onClick={() => onActionClick('show')}>
-                    <span className="icon-span"><EyeOutlined /></span>隐藏
+                <p title="隐藏" onClick={() => doChartActionManage({ type: ActionEnumType.SHOW })}>
+                    <span className="icon-span"><EyeInvisibleOutlined /></span>隐藏
                 </p>
             }
-            {chart && chart.is_lock ? <p title="解锁" onClick={() => onActionClick('lock')}>
-                    <span className="icon-span" title="解锁"><LockOutlined /></span>解锁
+            {activeChart && activeChart.is_lock ? <p title="解锁" onClick={() => doChartActionManage({ type: ActionEnumType.LOCK })}>
+                    <span className="icon-span" title="解锁"><UnlockOutlined /></span>解锁
                 </p> :
-                <p title="锁定" onClick={() => onActionClick('lock')}>
+                <p title="锁定" onClick={() => doChartActionManage({ type: ActionEnumType.LOCK })}>
                     <span className="icon-span" title="锁定"><LockOutlined /></span>锁定
                 </p>
             }

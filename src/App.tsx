@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux'
-import { BrowserRouter, HashRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 import store from './store'
 import './App.less'
 
@@ -9,11 +9,9 @@ function App() {
   return (
       <Provider store={store}>
         {/* 需要配置 BrowserRouter 路由才能用 */}
-        {/* <HashRouter> */}
-          <BrowserRouter>
+        <HashRouter>
             <Routers />
-          </BrowserRouter>
-        {/* </HashRouter> */}
+        </HashRouter>
       </Provider>
   )
 }

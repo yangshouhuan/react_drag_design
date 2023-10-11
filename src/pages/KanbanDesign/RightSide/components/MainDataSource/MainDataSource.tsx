@@ -1,9 +1,9 @@
 import { CloseOutlined, SearchOutlined, SyncOutlined } from "@ant-design/icons";
-import { Collapse, Drawer, Select, Space, Switch, Table } from "antd"
+import { Collapse, Drawer, Select, Switch, Table } from "antd"
 import MyCodemirror from "components/MyCodemirror";
 import { memo } from "react";
-import { DataSourceType, FieldType } from "types/chart";
 import './index.less'
+import { ChartSourceMapType, ChartSourceType } from "types/source";
 
 const {Option} = Select
 
@@ -11,20 +11,20 @@ const {Option} = Select
 const columns = [
     {
         title: '字段',
-        dataIndex: 'old_name',
+        dataIndex: 'fields',
         width: 60,
         ellipsis: true
     },
     {
         title: '映射',
-        dataIndex: 'new_name',
+        dataIndex: 'map_fields',
         width: 90,
         render: (val: string) => (<span>{(val && val.trim().length > 0 )? val : '-'}</span>),
         ellipsis: true
     },
     {
         title: '说明',
-        dataIndex: 'text',
+        dataIndex: 'name',
         width: 80,
         ellipsis: true
     }
@@ -34,14 +34,14 @@ const MainDataSource = ({
     visible,
     setVisible,
     source,
-    filterCode,
+    dataResult,
     doSourceType
 } : {
     visible: boolean
     setVisible: Function
-    source: DataSourceType
+    source: ChartSourceType
     doSourceType: Function
-    filterCode: string
+    dataResult: string
 }) => {
 
     return (
@@ -77,8 +77,8 @@ const MainDataSource = ({
                         <Select
                             style={{ width: '100%' }}
                             defaultValue="get"
-                            value={source.request_type || 'get'}
-                            onChange={(value: string) => doSourceType({data: value, type: 'request_type'})}
+                            value={source.request_method || 'get'}
+                            onChange={(value: string) => doSourceType({data: value, type: 'request_method'})}
                         >
                             <Option value="get">get</Option>
                             <Option value="post">post</Option>
@@ -94,8 +94,8 @@ const MainDataSource = ({
                                 readOnly={false}
                                 lineNumbers={false}
                                 height={100}
-                                codeValue={source.api_url || ''}
-                                onBlur={(value: string) => doSourceType({data: value, type: 'api_url'})}
+                                codeValue={source.request_url || ''}
+                                onBlur={(value: string) => doSourceType({data: value, type: 'request_url'})}
                             />
                         </div>
                         <div className="source-title show-response">
@@ -107,7 +107,7 @@ const MainDataSource = ({
             <div className="filter-content">
                 <div className="group-content-header">
                     <span className="status-span" style={{top: 21}}></span>
-                    {/* <Checkbox className="font-color-white" defaultChecked={source?.auth_filter} checked={source?.auth_filter}>数据过滤器</Checkbox> */}
+                    {/* <Checkbox className="font-color-white" defaultChecked={source?.auto_filter} checked={source?.auto_filter}>数据过滤器</Checkbox> */}
                     数据过滤器
                 </div>
                 <Collapse>
@@ -133,22 +133,22 @@ const MainDataSource = ({
                 <p className="flex-a source-title">
                     <Switch
                         size="small"
-                        checked={source.auth_filter}
-                        onChange={(checked: boolean) => doSourceType({data: checked, type: 'auth_filter'})}
+                        checked={source.use_filter}
+                        onChange={(checked: boolean) => doSourceType({data: checked, type: 'auto_filter'})}
                     /> &nbsp;&nbsp;开启过滤器调试(数据量过大时建议关闭)
                 </p>
             </div>
-            {source.map_field ? <div className="source-fields-table">
+            {source.result_structure && source.result_structure.length > 0 ? <div className="source-fields-table">
                 <div className="source-title">数据响应结果应为数据列表，列表元素包含如下字段</div>
                 <Table
                     size="small"
                     rowClassName="row-class-name"
                     columns={columns}
-                    dataSource={source.map_field.map((item: FieldType, index: number) => ({
+                    dataSource={source.result_structure?.map((item: ChartSourceMapType, index: number) => ({
                         key: index.toString(),
-                        old_name: item.old_name,
-                        new_name: item.new_name,
-                        text: item.text
+                        fields: item.fields,
+                        map_fields: item.map_fields,
+                        name: item.name
                     }))}
                     pagination={false}
                 />
@@ -164,7 +164,7 @@ const MainDataSource = ({
                         status={visible}
                         title={'数据响应结果'}
                         readOnly={true}
-                        codeValue={filterCode}
+                        codeValue={dataResult}
                     />
                 </div>
             </div>

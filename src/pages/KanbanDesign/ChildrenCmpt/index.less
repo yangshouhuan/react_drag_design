@@ -1,0 +1,74 @@
+.design-children-cmpt-container {
+	position: fixed;
+	left: 210px;
+	top: 46px;
+	bottom: 0;
+	width: 290px;
+	background-color: #0A0B0D;
+	border-right: 1px solid #000000;
+	z-index: 10;
+	transition: 0.2s all ease-in-out;
+	overflow: hidden;
+
+	.header {
+		width: 290px;
+		height: 36px;
+		padding: 4px 12px;
+		background-color: #2E343C;
+		box-sizing: border-box;
+		color: #ffffff;
+
+		.search-input {
+			width: 100px;
+			height: 20px;
+			font-size: 12px;
+		}
+		.icon-span {
+			margin-left: 8px;
+			font-size: 16px;
+			cursor: pointer;
+
+			&:hover {
+				color: #1890ff;
+			}
+		}
+	}
+
+	.child {
+		height: 34px;
+		padding: 0 10px;
+		color: #ffffff;
+		font-size: 12px;
+		border-bottom: 1px solid #2E343C;
+		box-shadow: 0 0 4px -2px #f2f2f2;
+
+		.child-name {
+			margin-left: 10px;
+		}
+		.child-name:hover {
+			color: #1890ff;
+		}
+	}
+	.child:hover {
+		cursor: pointer;
+		background-color: #2E343C;
+	}
+	.anticon-ellipsis {
+		margin: 0 5px;
+		padding: 0 2px;
+		border-radius: 2px;
+		background-color: #ffffff;
+		color: #000000;
+	}
+	.anticon-eye {
+		font-size: 16px;
+	}
+	.anticon-eye:hover {
+		color: #1890ff;
+	}
+
+	hr {
+		margin: 0;
+		padding: 0;
+	}
+}

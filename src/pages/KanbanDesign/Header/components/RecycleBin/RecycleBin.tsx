@@ -23,7 +23,7 @@ const getColumns = ({
     return [
         {
             title: '名称',
-            dataIndex: 'name',
+            dataIndex: 'chart_name',
             width: 100,
             ellipsis: true
         },
@@ -37,7 +37,7 @@ const getColumns = ({
         },
         {
             title: '时间',
-            dataIndex: 'del_date',
+            dataIndex: 'del_time',
             width: 160
         },
         {
@@ -104,7 +104,7 @@ const RecycleBin = ({
                 </div>
                 <div className="recycle-table">
                     <Table
-                        rowKey={'id'}
+                        rowKey={'chart_id'}
                         rowClassName="row-class-name"
                         childrenColumnName={'not_children'}
                         rowSelection={{
@@ -117,7 +117,7 @@ const RecycleBin = ({
                         }}
                         columns={getColumns({
                             onRecoverChart: (chart: ChartType) => doRecoverChart([chart]),
-                            onDelete: (chart: ChartType) => doDeleteChart([chart])
+                            onDelete: (chart: ChartType) => doDeleteChart([chart.chart_id])
                         })}
                         dataSource={tableData}
                         pagination={false}
@@ -130,7 +130,7 @@ const RecycleBin = ({
                         {
                             selectCharts.length > 0 ? <>
                                 <Button type='primary' onClick={() => doRecoverChart(selectCharts)} style={{ marginRight: 10 }}>恢复选择图层</Button>
-                                <Button onClick={() => doDeleteChart(selectCharts)}>删除选择图层</Button>
+                                <Button onClick={() => doDeleteChart(selectKeys)}>删除选择图层</Button>
                             </> : <></>
                         }
                     </div>

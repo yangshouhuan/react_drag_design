@@ -1,6 +1,5 @@
 import { connect } from 'react-redux'
 import RecycleBin from './RecycleBin'
-import { recycleVisible } from 'store/action/visible'
 import { doDeleteChart, doRecoverChart } from 'store/action/chart_base'
 
 const mapStateToProps = (state: any) => {

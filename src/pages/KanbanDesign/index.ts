@@ -1,3 +1,4 @@
 import KanbanDesign from './KanbanDesign'
+import { connect } from 'react-redux'
 
-export default KanbanDesign
+export default connect(null, null)(KanbanDesign)

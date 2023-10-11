@@ -3,6 +3,11 @@ import { MyRoute } from 'types/route';
 
 const routers: MyRoute.SyncRoute[] = [
 	{
+		name: 'Test',
+		component: lazy(() => import('pages/TestPage')),
+		path: '/Test'
+	},
+	{
 		name: 'Home',
 		component: lazy(() => import('pages/Login')),
 		path: '/'
@@ -17,12 +22,6 @@ const routers: MyRoute.SyncRoute[] = [
 	// 	component: lazy(() => import('pages/Register')),
 	// 	path: '/Register'
 	// },
-	{
-		name: 'KanbanPreview',
-		component: lazy(() => import('pages/KanbanPreview')),
-		path: '/KanbanPreview/:id',
-		auth: true
-	},
 	{
 		name: 'KanbanManage',
 		component: lazy(() => import('pages/KanbanManage')),
@@ -39,6 +38,20 @@ const routers: MyRoute.SyncRoute[] = [
 				name: 'KanbanDesign',
 				component: lazy(() => import('pages/KanbanDesign')),
 				path: '/KanbanDesign/:id'
+			}
+		]
+	},
+	{
+		name: 'KanbanPreviewLayout',
+		component: lazy(() => import('layouts/KanbanPreviewLayout')),
+		Redirect: '/KanbanPreview/:id',
+		auth: true,
+		children: [
+			{
+				name: 'KanbanPreview',
+				component: lazy(() => import('pages/KanbanPreview')),
+				path: '/KanbanPreview/:id',
+				auth: true
 			}
 		]
 	},

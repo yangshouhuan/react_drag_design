@@ -6,12 +6,12 @@ export const updateState = (state: any, value: any) => {
 
 const data = {
     side_visible: true,  // 右侧面板
-    // all_layer_visible: false, // 所有图层
     all_layer_visible: true, // 所有图层
     my_layer_visible: true,  // 我的图层
     recycle_visible: false,  // 回收站
     config_side_visible: true,  // 显示配置面板
-    action_visibld: false,  // 行为面板
+    action_visible: false,  // 行为面板
+    children_panel_visible: false, // 子组件
 }
 
 const visible = (state = data, action: any) => {
@@ -25,7 +25,9 @@ const visible = (state = data, action: any) => {
         case T.RECYCLE_VISIBLE:
             return updateState(state, { recycle_visible: !state.recycle_visible})
         case T.ACTION_VISIBLE:
-            return updateState(state, { action_visibld: action.payload })
+            return updateState(state, { action_visible: action.payload })
+        case T.CHILDREN_PANEL_VISIBLE:
+            return updateState(state, { children_panel_visible: action.payload })
         default:
             return state
     }
